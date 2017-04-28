@@ -23,4 +23,4 @@ set_target_properties(${PROJ_RESOLV_LIB}.shared PROPERTIES OUTPUT_NAME ${PROJ_RE
 
 install (TARGETS ${PROJ_RESOLV_LIB} DESTINATION lib${LIB_SUFFIX})
 install (TARGETS ${PROJ_RESOLV_LIB}.shared DESTINATION lib${LIB_SUFFIX})
-install (FILES resolv.h DESTINATION include/${PROJ_RESOLV_LIB})
+install (FILES ucresolv.h DESTINATION include/${PROJ_RESOLV_LIB})
