@@ -30,7 +30,9 @@
 #include <bits/sigcontext.h>
 
 #ifdef _BUILD_NON_YOCTO
+#ifndef SS_DISABLE  // to avoid double include
 #include <bits/sigstack.h>
+#endif
 #endif
 
 

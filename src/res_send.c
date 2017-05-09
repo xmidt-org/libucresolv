@@ -1245,7 +1245,7 @@ printf("send...");
 		    else
 		      sr = send (pfd[0].fd, buf, buflen, MSG_NOSIGNAL);
 printf("done\n");
-printf("sr : %d\n",sr);
+printf("sr : %d\n", (int)sr);
 		    if (sr != (nwritten != 0 ? buflen2 : buflen)) {
 				printf("ERROR on send\n");
 		      if (errno == EINTR || errno == EAGAIN)
