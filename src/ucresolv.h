@@ -285,11 +285,11 @@ __END_DECLS
 #define res_hostalias		__res_hostalias
 #define res_mailok		__res_mailok
 #define res_nameinquery		__res_nameinquery
-#define res_Nclose		__res_Nclose
-#define res_Ninit		__res_Ninit
+#define res_nclose		__res_nclose
+#define res_ninit		__res_ninit
 #define res_nmkquery		__res_nmkquery
-#define res_Nquery		__res_Nquery
-#define res_Nquerydomain	__res_Nquerydomain
+#define res_nquery		__res_nquery
+#define res_nquerydomain	__res_nquerydomain
 #define res_nsearch		__res_nsearch
 #define res_nsend		__res_nsend
 #define res_ownok		__res_ownok
@@ -344,15 +344,15 @@ int		res_queriesmatch (const unsigned char *,
 				  const unsigned char *,
 				  const unsigned char *) __THROW;
 /* Things involving a resolver context. */
-int		res_Ninit (res_state) __THROW;
+int		res_ninit (res_state) __THROW;
 void		fp_resstat (const res_state, FILE *) __THROW;
 const char *	res_hostalias (const res_state, const char *, char *, size_t)
      __THROW;
-int		res_Nquery (res_state, const char *, int, int,
+int		res_nquery (res_state, const char *, int, int,
 			    unsigned char *, int) __THROW;
 int		res_nsearch (res_state, const char *, int, int,
 			     unsigned char *, int) __THROW;
-int		res_Nquerydomain (res_state, const char *, const char *, int,
+int		res_nquerydomain (res_state, const char *, const char *, int,
 				  int, unsigned char *, int) __THROW;
 int		res_nmkquery (res_state, int, const char *, int, int,
 			      const unsigned char *, int,
@@ -360,7 +360,7 @@ int		res_nmkquery (res_state, int, const char *, int, int,
      __THROW;
 int		res_nsend (res_state, const unsigned char *, int,
 			   unsigned char *, int) __THROW;
-void		res_Nclose (res_state) __THROW;
+void		res_nclose (res_state) __THROW;
 __END_DECLS
 #endif
 

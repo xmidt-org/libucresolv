@@ -142,6 +142,8 @@ extern int __sendmmsg (int __fd, struct mmsghdr *__vmessages,
 
 extern int poll (struct pollfd *fds, nfds_t nfds, int timeout);
 
+extern void res_Nclose(res_state statp);
+
 /* From ev_streams.c.  */
 
 static inline void
