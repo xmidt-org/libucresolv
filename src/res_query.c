@@ -104,7 +104,7 @@ __libc_res_nsend(res_state statp, const u_char *buf, int buflen,
 #endif
 #define __set_errno(err) printf("error : %d,func : %s:%d\n",err,__FUNCTION__,__LINE__)
 static int
-__libc_res_nquerydomain(res_state statp, const char *name, const char *domain,
+__libc_res_Nquerydomain(res_state statp, const char *name, const char *domain,
 			int class, int type, u_char *answer, int anslen,
 			u_char **answerp, u_char **answerp2, int *nanswerp2,
 			int *resplen2, int *answerp2_malloced);
@@ -120,7 +120,7 @@ __libc_res_nquerydomain(res_state statp, const char *name, const char *domain,
  * Caller must parse answer and determine whether it answers the question.
  */
 int
-__libc_res_nquery(res_state statp,
+__libc_res_Nquery(res_state statp,
 		  const char *name,	/* domain name */
 		  int class, int type,	/* class and type of query */
 		  u_char *answer,	/* buffer to put answer */
@@ -134,7 +134,7 @@ __libc_res_nquery(res_state statp,
 	HEADER *hp = (HEADER *) answer;
 	HEADER *hp2;
 	int n, use_malloc = 0;
-printf("\nres_nquery...\n");
+printf("\nres_Nquery...\n");
 	size_t bufsize = (type == T_QUERY_A_AND_AAAA ? 2 : 1) * QUERYSIZE;
 	u_char *buf = alloca (bufsize);
 	u_char *query1 = buf;
@@ -319,19 +319,19 @@ printf("Count = %d\n",statp->nscount);
  success:
 	return (n);
 }
-libresolv_hidden_def (__libc_res_nquery)
+libresolv_hidden_def (__libc_res_Nquery)
 
 int
-res_nquery(res_state statp,
+res_Nquery(res_state statp,
 	   const char *name,	/* domain name */
 	   int class, int type,	/* class and type of query */
 	   u_char *answer,	/* buffer to put answer */
 	   int anslen)		/* size of answer buffer */
 {
-	return __libc_res_nquery(statp, name, class, type, answer, anslen,
+	return __libc_res_Nquery(statp, name, class, type, answer, anslen,
 				 NULL, NULL, NULL, NULL, NULL);
 }
-//libresolv_hidden_def (res_nquery)
+//libresolv_hidden_def (res_Nquery)
 
 /*
  * Formulate a normal query, send, and retrieve answer in supplied buffer.
@@ -372,7 +372,7 @@ __libc_res_nsearch(res_state statp,
 
 	/* If there aren't any dots, it could be a user-level alias. */
 	if (!dots && (cp = res_hostalias(statp, name, tmp, sizeof tmp))!= NULL)
-		return (__libc_res_nquery(statp, cp, class, type, answer,
+		return (__libc_res_Nquery(statp, cp, class, type, answer,
 					  anslen, answerp, answerp2,
 					  nanswerp2, resplen2, answerp2_malloced));
 
@@ -389,7 +389,7 @@ __libc_res_nsearch(res_state statp,
 	 */
 	saved_herrno = -1;
 	if (dots >= statp->ndots || trailing_dot) {
-		ret = __libc_res_nquerydomain(statp, name, NULL, class, type,
+		ret = __libc_res_Nquerydomain(statp, name, NULL, class, type,
 					      answer, anslen, answerp,
 					      answerp2, nanswerp2, resplen2,
 					      answerp2_malloced);
@@ -428,7 +428,7 @@ __libc_res_nsearch(res_state statp,
 			const char *dname = domain[0];
 			searched = 1;
 
-			/* __libc_res_nquerydoman concatenates name
+			/* __libc_res_Nquerydoman concatenates name
 			   with dname with a "." in between.  If we
 			   pass it in dname the "." we got from the
 			   configured default search path, we'll end
@@ -442,7 +442,7 @@ __libc_res_nsearch(res_state statp,
 			if (dname[0] == '\0')
 				root_on_list++;
 
-			ret = __libc_res_nquerydomain(statp, name, dname,
+			ret = __libc_res_Nquerydomain(statp, name, dname,
 						      class, type,
 						      answer, anslen, answerp,
 						      answerp2, nanswerp2,
@@ -514,7 +514,7 @@ __libc_res_nsearch(res_state statp,
 	 */
 	if ((dots || !searched || (statp->options & RES_NOTLDQUERY) == 0)
 	    && !(tried_as_is || root_on_list)) {
-		ret = __libc_res_nquerydomain(statp, name, NULL, class, type,
+		ret = __libc_res_Nquerydomain(statp, name, NULL, class, type,
 					      answer, anslen, answerp,
 					      answerp2, nanswerp2, resplen2,
 					      answerp2_malloced);
@@ -563,7 +563,7 @@ libresolv_hidden_def (res_nsearch)
  * Perform a call on res_query on the concatenation of name and domain.
  */
 static int
-__libc_res_nquerydomain(res_state statp,
+__libc_res_Nquerydomain(res_state statp,
 			const char *name,
 			const char *domain,
 			int class, int type,	/* class and type of query */
@@ -581,7 +581,7 @@ __libc_res_nquerydomain(res_state statp,
 
 #ifdef DEBUG
 	if (statp->options & RES_DEBUG)
-		printf(";; res_nquerydomain(%s, %s, %d, %d)\n",
+		printf(";; res_Nquerydomain(%s, %s, %d, %d)\n",
 		       name, domain?domain:"<Nil>", class, type);
 #endif
 	if (domain == NULL) {
@@ -605,24 +605,24 @@ __libc_res_nquerydomain(res_state statp,
 		}
 		sprintf(nbuf, "%s.%s", name, domain);
 	}
-	return (__libc_res_nquery(statp, longname, class, type, answer,
+	return (__libc_res_Nquery(statp, longname, class, type, answer,
 				  anslen, answerp, answerp2, nanswerp2,
 				  resplen2, answerp2_malloced));
 }
 
 int
-res_nquerydomain(res_state statp,
+res_Nquerydomain(res_state statp,
 	    const char *name,
 	    const char *domain,
 	    int class, int type,	/* class and type of query */
 	    u_char *answer,		/* buffer to put answer */
 	    int anslen)		/* size of answer */
 {
-	return __libc_res_nquerydomain(statp, name, domain, class, type,
+	return __libc_res_Nquerydomain(statp, name, domain, class, type,
 				       answer, anslen, NULL, NULL, NULL, NULL,
 				       NULL);
 }
-libresolv_hidden_def (res_nquerydomain)
+libresolv_hidden_def (res_Nquerydomain)
 
 const char *
 res_hostalias(const res_state statp, const char *name, char *dst, size_t siz) {

@@ -109,12 +109,12 @@ unsigned long long int __res_initstamp attribute_hidden;
  * Return 0 if completes successfully, -1 on error
  */
 int
-res_ninit(res_state statp) {
+res_Ninit(res_state statp) {
 	extern int __res_vinit(res_state, int);
 
 	return (__res_vinit(statp, 0));
 }
-libc_hidden_def (__res_ninit)
+libc_hidden_def (__res_Ninit)
 
 /* This function has to be reachable by res_data.c but not publically. */
 int
@@ -519,18 +519,18 @@ __res_iclose(res_state statp, bool free_addr) {
 libc_hidden_def (__res_iclose)
 
 void
-res_nclose(res_state statp)
+res_Nclose(res_state statp)
 {
   __res_iclose (statp, true);
 }
-libc_hidden_def (__res_nclose)
+libc_hidden_def (__res_Nclose)
 
 /* This is called when a thread is exiting to free resources held in _res.  */
 static void __attribute__ ((section ("__libc_thread_freeres_fn")))
 res_thread_freeres (void)
 {
   if (_res.nscount == 0)
-    /* Never called res_ninit.  */
+    /* Never called res_Ninit.  */
     return;
 
   __res_iclose (&_res, true);		/* Close any VC sockets.  */

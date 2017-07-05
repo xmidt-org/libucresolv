@@ -430,7 +430,7 @@ printf("__libc_res_nsend\n");
 			}
 		if (needclose) {
 			//__res_iclose(statp, false);
-			res_nclose(statp);
+			res_Nclose(statp);
 			EXT(statp).nscount = 0;
 		}
 	}
@@ -553,14 +553,14 @@ printf("__libc_res_nsend\n");
 		if ((v_circuit && (statp->options & RES_USEVC) == 0) ||
 		    (statp->options & RES_STAYOPEN) == 0) {
 			//__res_iclose(statp, false);
-			res_nclose(statp);
+			res_Nclose(statp);
 		}
 		return (resplen);
  next_ns: ;
 	   } /*foreach ns*/
 	} /*foreach retry*/
 	//__res_iclose(statp, false);
-	res_nclose(statp);
+	res_Nclose(statp);
 	if (!v_circuit) {
 		if (!gotsomewhere)
 			__set_errno (ECONNREFUSED);	/* no nameservers found */
@@ -604,7 +604,7 @@ __attribute__ ((warn_unused_result))
 close_and_return_error (res_state statp, int *resplen2)
 {
   //__res_iclose(statp, false);
-  res_nclose(statp);
+  res_Nclose(statp);
   if (resplen2 != NULL)
     *resplen2 = 0;
   return 0;
@@ -725,7 +725,7 @@ send_vc(res_state statp,
 				(struct sockaddr *)&peer, &size) < 0 ||
 		    !sock_eq(&peer, (struct sockaddr_in6 *) nsap)) {
 			//__res_iclose(statp, false);
-			res_nclose(statp);
+			res_Nclose(statp);
 			statp->_flags &= ~RES_F_VC;
 		}
 	}
@@ -733,7 +733,7 @@ send_vc(res_state statp,
 	if (statp->_vcsock < 0 || (statp->_flags & RES_F_VC) == 0) {
 		if (statp->_vcsock >= 0)
 		  //__res_iclose(statp, false);
-			res_nclose(statp);
+			res_Nclose(statp);
 
 		statp->_vcsock = socket(nsap->sa_family, SOCK_STREAM, 0);
 		if (statp->_vcsock < 0) {
@@ -807,7 +807,7 @@ send_vc(res_state statp,
 		if (*terrno == ECONNRESET && !connreset)
 		  {
 		    //__res_iclose(statp, false);
-			res_nclose(statp);
+			res_Nclose(statp);
 		    connreset = 1;
 		    goto same_ns;
 		  }
@@ -986,7 +986,7 @@ reopen (res_state statp, int *terrno, int ns)
 		DIAG_POP_NEEDS_COMMENT;
 			Aerror(statp, stderr, "connect(dg)", errno, nsap);
 			//__res_iclose(statp, false);
-			res_nclose(statp);
+			res_Nclose(statp);
 			return (0);
 		}
 	}
@@ -1151,7 +1151,7 @@ send_dg(res_state statp,
 			single_request_reopen = true;
 			*gotsomewhere = save_gotsomewhere;
 			//__res_iclose(statp, false);
-			res_nclose(statp);
+			res_Nclose(statp);
 			goto retry_reopen;
 		      }
 
@@ -1433,7 +1433,7 @@ printf("sr : %d\n", (int)sr);
 			if (!statp->pfcode)
 			  return close_and_return_error (statp, resplen2);
 			//__res_iclose(statp, false);
-			res_nclose(statp);
+			res_Nclose(statp);
 		}
 		if (anhp->rcode == NOERROR && anhp->ancount == 0
 		    && anhp->aa == 0 && anhp->ra == 0 && anhp->arcount == 0) {
@@ -1455,7 +1455,7 @@ printf("sr : %d\n", (int)sr);
 			       (stdout, ";; truncated answer\n"));
 			*v_circuit = 1;
 			//__res_iclose(statp, false);
-			res_nclose(statp);
+			res_Nclose(statp);
 			// XXX if we have received one reply we could
 			// XXX use it and not repeat it over TCP...
 			if (resplen2 != NULL)
@@ -1473,7 +1473,7 @@ printf("sr : %d\n", (int)sr);
 				pfd[0].events = POLLOUT;
 				if (single_request_reopen) {
 					//__res_iclose(statp, false);
-					res_nclose(statp);
+					res_Nclose(statp);
 					retval = reopen (statp, terrno, ns);
 					if (retval <= 0)
 					  {
