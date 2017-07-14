@@ -57,7 +57,7 @@ enum
        spoofing attacks because the randomness in a DNS packet is
        concentrated in the first fragment (with the headers) and does
        not protect subsequent fragments.  */
-    RESOLV_EDNS_BUFFER_SIZE = 1200,
+    RESOLV_EDNS_BUFFER_SIZE = 1200
   };
 
 /* Add an OPT record to a DNS query.  */

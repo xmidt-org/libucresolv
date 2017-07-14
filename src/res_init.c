@@ -64,38 +64,53 @@
  * SOFTWARE.
  */
 
-#include <ctype.h>
 #include <netdb.h>
-#include <ucresolv-internal.h>
-#include <stdio.h>
+#define __OPTIMIZE__ 1
+#include <libc-symbols.h>
+//#include <glibc-cdefs.h>
+#include <glibc-ctype.h>
+#include <glibc-stdio.h>
+//#include <stdio.h>
 #include <stdio_ext.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
+#include <glibc-string.h>
+#include <glibc-stdlib/stdlib.h>
+#include <glibc-unistd.h>
 #include <stdint.h>
-#include <arpa/inet.h>
-#include <arpa/nameser.h>
+#include <glibc-arpa/inet.h>
+#include <glibc-arpa/nameser.h>
+
+//#define internal_function
+
 #include <net/if.h>
 #include <netinet/in.h>
+#include <ucresolv.h>
+#include <ucresolv-internal.h>
 #include <sys/param.h>
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <sys/types.h>
+#include <sys/ioctl.h>
+#include <sys/uio.h>
+#include <sys/poll.h>
 #include <inet/net-internal.h>
-
 #include <not-cancel.h>
+
+#define __glibc_likely(cond) (cond)
+typedef unsigned int __u_int;
+typedef __u_int u_int;
 
 /* Options.  Should all be left alone. */
 /* #undef DEBUG */
+
 
 static void res_setoptions (res_state, const char *, const char *)
      internal_function;
 
 static const char sort_mask_chars[] = "/&";
 #define ISSORTMASK(ch) (strchr(sort_mask_chars, ch) != NULL)
-static u_int32_t net_mask (struct in_addr) __THROW;
+static u_int32_t net_mask (struct in_addr); // __THROW;
 
-unsigned long long int __res_initstamp attribute_hidden;
+unsigned long long int __res_initstamp; // attribute_hidden;
 
 /*
  * Resolver state default settings.

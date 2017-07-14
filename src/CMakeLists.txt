@@ -14,7 +14,7 @@
 set(PROJ_RESOLV_LIB ucresolv)
 
 file(GLOB HEADERS ucresolv.h)
-set(SOURCES res_query.c res_mkquery.c res_send.c)
+set(SOURCES res_init.c res_query.c res_mkquery.c res_send.c)
 
 add_library(${PROJ_RESOLV_LIB} STATIC ${HEADERS} ${SOURCES})
 add_library(${PROJ_RESOLV_LIB}.shared SHARED ${HEADERS} ${SOURCES})

@@ -66,12 +66,14 @@
 
 #include <sys/types.h>
 #include <sys/param.h>
+#define __OPTIMIZE__ 1
+#include <libc-symbols.h>
 #include <netinet/in.h>
-#include <arpa/nameser.h>
 #include <netdb.h>
 #include <ucresolv-internal.h>
-#include <stdio.h>
-#include <string.h>
+#include <glibc-stdio.h>
+#include <glibc-string.h>
+#include <glibc-arpa/nameser.h>
 #include <sys/time.h>
 
 /* Options.  Leave them on. */
@@ -86,8 +88,16 @@
 #ifndef __glibc_unlikely
 #define __glibc_unlikely
 #endif
+
+typedef unsigned long __u_long;
+typedef __u_long u_long;
+typedef unsigned int __u_int;
+typedef __u_int u_int;
+typedef unsigned char __u_char;
+typedef __u_char u_char;
+
 extern int gettimeofday (struct timeval *__tv,
-                           struct timezone *__tz);
+                         void *__tz);
 #define NS_OPT_DNSSEC_OK        0x8000U
 /*
  * Form all types of queries.

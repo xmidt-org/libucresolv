@@ -93,23 +93,24 @@
 #include <sys/uio.h>
 #include <sys/poll.h>
 
+#define __OPTIMIZE__ 1
+#include <libc-symbols.h>
 #include <netinet/in.h>
-#include <arpa/nameser.h>
-#include <arpa/inet.h>
+#include <glibc-arpa/nameser.h>
+#include <glibc-arpa/inet.h>
 #include <sys/ioctl.h>
 
-#include <errno.h>
 #include <fcntl.h>
 #include <netdb.h>
-#include <ucresolv-internal.h>
+#include "ucresolv-internal.h"
 #include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
+#include <glibc-errno.h>
+#include <glibc-stdio.h>
+#include <glibc-stdlib/stdlib.h>
+#include <glibc-string.h>
+#include <glibc-unistd.h>
 #include <kernel-features.h>
 #include <libc-diag.h>
-#include <errno.h>
 
 #if PACKETSZ > 65536
 #define MAXPACKET       PACKETSZ
@@ -118,7 +119,7 @@
 #endif
 
 #define libresolv_hidden_def(name)
-#define __set_errno(err) printf("error : %d,func : %s:%d\n",err,__FUNCTION__,__LINE__)
+#define __show_errno(err) printf("error : %d,func : %s:%d\n",err,__FUNCTION__,__LINE__)
 
 #ifndef __glibc_likely
 #define __glibc_likely
@@ -127,6 +128,11 @@
 #ifndef __glibc_unlikely
 #define __glibc_unlikely
 #endif
+
+typedef unsigned short __u_short;
+typedef __u_short u_short;
+typedef unsigned char __u_char;
+typedef __u_char u_char;
 
 
 #ifndef _BUILD_NON_YOCTO
@@ -393,12 +399,12 @@ __libc_res_nsend(res_state statp, const u_char *buf, int buflen,
   int gotsomewhere, terrno, try, v_circuit, resplen, ns, n;
 printf("__libc_res_nsend\n");
 	if (statp->nscount == 0) {
-		__set_errno (ESRCH);
+		__show_errno (ESRCH);
 		return (-1);
 	}
 
 	if (anssiz < (buf2 == NULL ? 1 : 2) * HFIXEDSZ) {
-		__set_errno (EINVAL);
+		__show_errno (EINVAL);
 		return (-1);
 	}
 
@@ -565,11 +571,11 @@ printf("__libc_res_nsend\n");
 	res_Nclose(statp);
 	if (!v_circuit) {
 		if (!gotsomewhere)
-			__set_errno (ECONNREFUSED);	/* no nameservers found */
+			__show_errno (ECONNREFUSED);	/* no nameservers found */
 		else
-			__set_errno (ETIMEDOUT);	/* no answer obtained */
+			__show_errno (ETIMEDOUT);	/* no answer obtained */
 	} else
-		__set_errno (terrno);
+		__show_errno (terrno);
 	return (-1);
 }
 
@@ -745,7 +751,7 @@ send_vc(res_state statp,
 			  *resplen2 = 0;
 			return (-1);
 		}
-		__set_errno (0);
+		__show_errno (0);
 		if (connect(statp->_vcsock, nsap,
 			    nsap->sa_family == AF_INET
 			    ? sizeof (struct sockaddr_in)
@@ -1172,7 +1178,7 @@ send_dg(res_state statp,
 
 		goto poll_err_out;
 	}
-	__set_errno (0);
+	__show_errno (0);
 	if (pfd[0].revents & POLLOUT) {
 #ifndef __ASSUME_SENDMMSG
 		static int have_sendmmsg;
@@ -1526,7 +1532,7 @@ Aerror(const res_state statp, FILE *file, const char *string, int error,
 			 : 0),
 			strerror(error));
 	}
-	__set_errno (save);
+	__show_errno (save);
 }
 
 static void

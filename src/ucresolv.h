@@ -61,8 +61,8 @@
 
 # include <sys/param.h>
 # include <sys/cdefs.h>
-# include <stdio.h>
-# include <arpa/nameser.h>
+# include <glibc-stdio.h>
+# include <glibc-arpa/nameser.h>
 #endif
 
 #ifndef __res_state_defined

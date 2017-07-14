@@ -67,18 +67,24 @@
 #include <assert.h>
 #include <sys/types.h>
 #include <sys/param.h>
+#define __OPTIMIZE__ 1
+#include <libc-symbols.h>
 #include <netinet/in.h>
-#include <arpa/inet.h>
-#include <arpa/nameser.h>
-#include <ctype.h>
-#include <errno.h>
+#include <glibc-arpa/inet.h>
+#include <glibc-arpa/nameser.h>
+#include <glibc-ctype.h>
+#include <glibc-errno.h>
 #include <netdb.h>
-#include <ucresolv.h>
-#include <ucresolv-internal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "ucresolv.h"
+#include "ucresolv-internal.h"
+#include <glibc-stdio.h>
+#include <glibc-stdlib/stdlib.h>
+#include <glibc-string.h>
 
+typedef unsigned int __u_int;
+typedef __u_int u_int;
+typedef unsigned char __u_char;
+typedef __u_char u_char;
 
 #define T_QUERY_A_AND_AAAA 439963904
 extern int
@@ -102,7 +108,7 @@ __libc_res_nsend(res_state statp, const u_char *buf, int buflen,
 #ifndef __glibc_unlikely 
 #define __glibc_unlikely 
 #endif
-#define __set_errno(err) printf("error : %d,func : %s:%d\n",err,__FUNCTION__,__LINE__)
+#define __show_errno(err) printf("error : %d,func : %s:%d\n",err,__FUNCTION__,__LINE__)
 static int
 __libc_res_Nquerydomain(res_state statp, const char *name, const char *domain,
 			int class, int type, u_char *answer, int anslen,
@@ -360,7 +366,7 @@ __libc_res_nsearch(res_state statp,
 	int tried_as_is = 0;
 	int searched = 0;
 
-	__set_errno (0);
+	__show_errno (0);
 	RES_SET_H_ERRNO(statp, HOST_NOT_FOUND);  /* True if we never query. */
 
 	dots = 0;
