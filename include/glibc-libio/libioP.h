@@ -89,7 +89,7 @@ extern "C" {
  * object being acted on (i.e. the 'this' parameter).
  */
 
-#ifdef _LIBC
+#if 0			// #ifdef _LIBC
 # include <shlib-compat.h>
 # if !SHLIB_COMPAT (libc, GLIBC_2_0, GLIBC_2_1)
    /* Setting this macro disables the use of the _vtable_offset
