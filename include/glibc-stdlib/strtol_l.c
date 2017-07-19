@@ -27,8 +27,10 @@
 # define HAVE_LIMITS_H
 #endif
 
-#include <ctype.h>
-#include <errno.h>
+#define __OPTIMIZE__ 1
+#include <libc-symbols.h>
+#include <glibc-ctype.h>
+#include <glibc-errno.h>
 #ifndef __set_errno
 # define __set_errno(Val) errno = (Val)
 #endif
@@ -38,9 +40,9 @@
 #endif
 
 #include <stddef.h>
-#include <stdlib.h>
-#include <string.h>
-#include <locale.h>
+#include <glibc-stdlib.h>
+#include <glibc-string.h>
+#include <glibc-locale.h>
 #include <stdint.h>
 #include <bits/wordsize.h>
 

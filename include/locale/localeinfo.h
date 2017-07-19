@@ -22,8 +22,8 @@
 #include <stddef.h>
 #include <langinfo.h>
 #include <limits.h>
-#include <locale.h>
-#include <time.h>
+#include <glibc-locale.h>
+#include <glibc-time.h>
 #include <stdint.h>
 #include <sys/types.h>
 

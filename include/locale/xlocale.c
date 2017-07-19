@@ -17,7 +17,9 @@
    License along with the GNU C Library; if not, see
    <http://www.gnu.org/licenses/>.  */
 
-#include <locale.h>
+#define __OPTIMIZE__ 1
+#include <libc-symbols.h>
+#include <glibc-locale.h>
 #include "localeinfo.h"
 
 #define DEFINE_CATEGORY(category, category_name, items, a) \

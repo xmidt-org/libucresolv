@@ -20,9 +20,11 @@
 #define QUAD		1
 #define UNSIGNED	1
 
-#include <locale.h>
+#define __OPTIMIZE__ 1
+#include <libc-symbols.h>
+#include <glibc-locale.h>
 
 extern unsigned long long int ____strtoull_l_internal (const char *, char **,
 						       int, int, locale_t);
 
-#include <strtol_l.c>
+#include <glibc-stdlib/strtol_l.c>

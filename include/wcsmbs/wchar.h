@@ -39,7 +39,7 @@
 
 #include <bits/wchar.h>
 #include <bits/types/wint_t.h>
-#include <bits/types/mbstate_t.h>
+#include <wcsmbs/bits/types/mbstate_t.h>
 #include <bits/types/__FILE.h>
 
 #if defined __USE_UNIX98 || defined __USE_XOPEN2K
