@@ -16,8 +16,9 @@
    License along with the GNU C Library; if not, see
    <http://www.gnu.org/licenses/>.  */
 
+#define __OPTIMIZE__ 1
+#include <libc-symbols.h>
 #include <endian.h>
-
 #include "localeinfo.h"
 
 /* This table's entries are taken from ISO 14652, the table in section

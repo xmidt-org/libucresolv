@@ -16,6 +16,8 @@
    License along with the GNU C Library; if not, see
    <http://www.gnu.org/licenses/>.  */
 
+#define __OPTIMIZE__ 1
+#include <libc-symbols.h>
 #include "localeinfo.h"
 
 _NL_CURRENT_DEFINE (LC_ADDRESS);

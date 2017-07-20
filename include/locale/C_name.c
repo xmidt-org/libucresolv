@@ -1,6 +1,8 @@
 /* Define a constant for the name of the standard C locale, so the string
    constant is not repeated in dozens of object files.  */
 
+#define __OPTIMIZE__ 1
+#include <libc-symbols.h>
 #include "localeinfo.h"
 
 /* Name of our standard locale.  */

@@ -18,6 +18,8 @@
 
 #include <endian.h>
 
+#define __OPTIMIZE__ 1
+#include <libc-symbols.h>
 #include "localeinfo.h"
 
 /* This table's entries are taken from ISO 14652, the table in section
