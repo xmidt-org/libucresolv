@@ -37,6 +37,13 @@
 
 #ifdef HAVE_LIMITS_H
 # include <limits.h>
+#else
+#  if __WORDSIZE == 64
+#   define LONG_MAX	9223372036854775807L
+#  else
+#   define LONG_MAX	2147483647L
+#  endif
+#  define LONG_MIN	(-LONG_MAX - 1L)
 #endif
 
 #include <stddef.h>
@@ -234,8 +241,10 @@ INTERNAL (__strtol_l) (const STRING_TYPE *nptr, STRING_TYPE **endptr,
   UCHAR_TYPE c;
   const STRING_TYPE *save, *end;
   int overflow;
+#ifdef USE_NUMBER_GROUPING
 #ifndef USE_WIDE_CHAR
   size_t cnt;
+#endif
 #endif
 
 #ifdef USE_NUMBER_GROUPING

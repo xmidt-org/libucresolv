@@ -18,8 +18,11 @@ set(SOURCES res_init.c res_query.c res_mkquery.c res_send.c
   gethostname.c inet_pton.c iofgets_u.c inet6_scopeid_pton.c
   inet_addr.c inet_mkadr.c if_index.c
   ../include/glibc-stdlib/strtoull_l.c
+  ../include/glibc-stdlib/strtol_l.c
+  ../include/glibc-stdlib/grouping.c
   ../include/locale/xlocale.c
   ../include/locale/C-address.c
+  ../include/locale/C-collate.c
   ../include/locale/C-ctype.c
   ../include/locale/C-identification.c
   ../include/locale/C-measurement.c

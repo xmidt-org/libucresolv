@@ -17,13 +17,19 @@
    License along with the GNU C Library; if not, see
    <http://www.gnu.org/licenses/>.  */
 
+
+#define __OPTIMIZE__ 1
+#include <libc-symbols.h>
 #include <limits.h>
 #include <stddef.h>
 #include <string.h>
 
 #ifndef MAX
+/* We do not have typeof
 #define MAX(a,b)	({ typeof(a) _a = (a); typeof(b) _b = (b); \
 			   _a > _b ? _a : _b; })
+*/
+#define MAX(a,b)	( (a) > (b) ? (a) : (b) )
 #endif
 
 #ifdef USE_WIDE_CHAR
