@@ -346,7 +346,7 @@ res_Nquery(res_state statp,
  * is detected.  Error code, if any, is left in H_ERRNO.
  */
 int
-__libc_res_nsearch(res_state statp,
+__libc_res_Nsearch(res_state statp,
 		   const char *name,	/* domain name */
 		   int class, int type,	/* class and type of query */
 		   u_char *answer,	/* buffer to put answer */
@@ -551,19 +551,19 @@ __libc_res_nsearch(res_state statp,
 		RES_SET_H_ERRNO(statp, TRY_AGAIN);
 	return (-1);
 }
-libresolv_hidden_def (__libc_res_nsearch)
+libresolv_hidden_def (__libc_res_Nsearch)
 
 int
-res_nsearch(res_state statp,
+res_Nsearch(res_state statp,
 	    const char *name,	/* domain name */
 	    int class, int type,	/* class and type of query */
 	    u_char *answer,	/* buffer to put answer */
 	    int anslen)		/* size of answer */
 {
-	return __libc_res_nsearch(statp, name, class, type, answer,
+	return __libc_res_Nsearch(statp, name, class, type, answer,
 				  anslen, NULL, NULL, NULL, NULL, NULL);
 }
-libresolv_hidden_def (res_nsearch)
+libresolv_hidden_def (res_Nsearch)
 
 /*
  * Perform a call on res_query on the concatenation of name and domain.
