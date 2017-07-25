@@ -1099,6 +1099,7 @@ send_dg(res_state statp,
 	  {
 	    if (resplen2 != NULL)
 	      *resplen2 = 0;
+			printf ("send_dg rtn 1 retry_reopen\n");
 	    return retval;
 	  }
  retry:
@@ -1120,6 +1121,7 @@ send_dg(res_state statp,
 		if (evCmpTime(finish, now) <= 0) {
 		poll_err_out:
 			Perror(statp, stderr, "poll", errno);
+			printf ("send_dg rtn 2 recompute_resend\n");
 			return close_and_return_error (statp, resplen2);
 		}
 		evSubTime(&timeout, &finish, &now);
@@ -1164,12 +1166,14 @@ send_dg(res_state statp,
 		      }
 
 		    *resplen2 = 1;
+				printf ("send_dg rtn 3 return resplen\n");
 		    return resplen;
 		  }
 
 		*gotsomewhere = 1;
 		if (resplen2 != NULL)
 		  *resplen2 = 0;
+    printf ("send_dg rtn 4 return 0\n");
 		return 0;
 	}
 	if (n < 0) {
@@ -1238,6 +1242,7 @@ send_dg(res_state statp,
 
 		      fail_sendmmsg:
 			Perror(statp, stderr, "sendmmsg", errno);
+			printf ("send_dg rtn 5 close and rtn error\n");
 			return close_and_return_error (statp, resplen2);
 		      }
 		  }
@@ -1259,6 +1264,7 @@ printf("sr : %d\n", (int)sr);
 		      if (errno == EINTR || errno == EAGAIN)
 			goto recompute_resend;
 		      Perror(statp, stderr, "send", errno);
+					printf ("send_dg rtn 6 close and rtn error\n");
 		      return close_and_return_error (statp, resplen2);
 		    }
 		  just_one:
@@ -1338,6 +1344,7 @@ printf("sr : %d\n", (int)sr);
 				goto wait;
 			}
 			Perror(statp, stderr, "recvfrom", errno);
+			printf ("send_dg rtn 7 close and rtn error\n");
 			return close_and_return_error (statp, resplen2);
 		}
 		printf("..done\n");
@@ -1351,6 +1358,7 @@ printf("sr : %d\n", (int)sr);
 			       (stdout, ";; undersized: %d\n",
 				*thisresplenp));
 			*terrno = EMSGSIZE;
+			printf ("send_dg rtn 8 Undersized\n");
 			return close_and_return_error (statp, resplen2);
 		}
 		if ((recvresp1 || hp->id != anhp->id)
@@ -1421,6 +1429,7 @@ printf("sr : %d\n", (int)sr);
 		next_ns:
 			if (recvresp1 || (buf2 != NULL && recvresp2)) {
 			  *resplen2 = 0;
+				printf ("send_dg rtn 9 next_ns\n");
 			  return resplen;
 			}
 			if (buf2 != NULL)
@@ -1468,6 +1477,7 @@ printf("sr : %d\n", (int)sr);
 			// XXX use it and not repeat it over TCP...
 			if (resplen2 != NULL)
 			  *resplen2 = 0;
+			printf ("send_dg rtn 10 after res_Nclose\n");
 			return (1);
 		}
 		/* Mark which reply we received.  */
@@ -1487,6 +1497,7 @@ printf("sr : %d\n", (int)sr);
 					  {
 					    if (resplen2 != NULL)
 					      *resplen2 = 0;
+							printf ("send_dg rtn 11 after res_Nclose and reopen\n");
 					    return retval;
 					  }
 					pfd[0].fd = EXT(statp).nssocks[ns];
@@ -1496,12 +1507,15 @@ printf("sr : %d\n", (int)sr);
 		}
 		/* All is well.  We have received both responses (if
 		   two responses were requested).  */
+		printf ("send_dg rtn 12 all is well\n");
 		return (resplen);
-	} else if (pfd[0].revents & (POLLERR | POLLHUP | POLLNVAL))
+	} else if (pfd[0].revents & (POLLERR | POLLHUP | POLLNVAL)) {
 	  /* Something went wrong.  We can stop trying.  */
+		printf ("send_dg rtn 13 stop trying\n");
 	  return close_and_return_error (statp, resplen2);
-	else {
+	} else {
 		/* poll should not have returned > 0 in this case.  */
+		printf ("send_dg abort\n");
 		abort ();
 	}
 }
