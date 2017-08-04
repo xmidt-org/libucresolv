@@ -23,6 +23,7 @@
 #define	_ERRNO_H 1
 
 #include <features.h>
+#include <glibc-cdefs.h>
 
 /* The system-specific definitions of the E* constants, as macros.  */
 #include <bits/errno.h>

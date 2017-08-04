@@ -23,6 +23,7 @@
 #define	_STRING_H	1
 
 #define __GLIBC_INTERNAL_STARTING_HEADER_IMPLEMENTATION
+#include <features.h>
 #include <bits/libc-header-start.h>
 
 __BEGIN_DECLS

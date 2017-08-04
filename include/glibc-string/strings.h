@@ -19,6 +19,7 @@
 #define	_STRINGS_H	1
 
 #include <features.h>
+#include <glibc-cdefs.h>
 #define __need_size_t
 #include <stddef.h>
 

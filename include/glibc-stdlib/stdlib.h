@@ -22,6 +22,7 @@
 #ifndef	_STDLIB_H
 
 #define __GLIBC_INTERNAL_STARTING_HEADER_IMPLEMENTATION
+#include <features.h>
 #include <bits/libc-header-start.h>
 
 /* Get size_t, wchar_t and NULL from <stddef.h>.  */
