@@ -64,7 +64,6 @@
  * SOFTWARE.
  */
 
-#include <netdb.h>
 #define __OPTIMIZE__ 1
 #include <libc-symbols.h>
 //#include <glibc-cdefs.h>
@@ -73,6 +72,7 @@
 //#include <stdio.h>
 #include <stdio_ext.h>
 #include <glibc-string.h>
+#include <netdb.h>
 #include <glibc-stdlib/stdlib.h>
 #include <glibc-unistd.h>
 #include <stdint.h>
@@ -95,7 +95,10 @@
 #include <inet/net-internal.h>
 #include <not-cancel.h>
 
+#ifndef __glibc_likely
 #define __glibc_likely(cond) (cond)
+#endif
+
 typedef unsigned int __u_int;
 typedef __u_int u_int;
 

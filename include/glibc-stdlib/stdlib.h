@@ -465,7 +465,9 @@ extern int posix_memalign (void **__memptr, size_t __alignment, size_t __size)
 #endif
 
 #ifdef __USE_ISOC11
+#ifndef __attribute_alloc_size__
 #define __attribute_alloc_size__(params)  /* ignore */
+#endif
 /* ISO C variant of aligned allocation.  */
 extern void *aligned_alloc (size_t __alignment, size_t __size)
      /*__THROW*/ __attribute_malloc__ __attribute_alloc_size__ ((2)) __wur;
