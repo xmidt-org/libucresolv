@@ -213,6 +213,9 @@ extern const unsigned char __strtol_ull_rem_tab[] attribute_hidden;
 /* Define some more readable aliases for these arrays which correspond
    to how they'll be used in the function below.  */
 #define jmax_tab	__strtol_ul_max_tab
+# define cutoff_tab	__strtol_ul_max_tab
+# define cutlim_tab	__strtol_ul_rem_tab
+/*
 #if defined(QUAD) && __WORDSIZE == 32
 # define cutoff_tab	__strtol_ull_max_tab
 # define cutlim_tab	__strtol_ull_rem_tab
@@ -220,7 +223,7 @@ extern const unsigned char __strtol_ull_rem_tab[] attribute_hidden;
 # define cutoff_tab	__strtol_ul_max_tab
 # define cutlim_tab	__strtol_ul_rem_tab
 #endif
-
+*/
 
 /* Convert NPTR to an `unsigned long int' or `long int' in base BASE.
    If BASE is 0 the base is determined by the presence of a leading
