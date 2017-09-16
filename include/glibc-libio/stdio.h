@@ -26,6 +26,10 @@
 #define __GLIBC_INTERNAL_STARTING_HEADER_IMPLEMENTATION
 #include <bits/libc-header-start.h>
 
+#ifndef __GLIBC_USE
+#define __GLIBC_USE(F) __GLIBC_USE_ ## F
+#endif
+
 __BEGIN_DECLS
 
 #define __need_size_t

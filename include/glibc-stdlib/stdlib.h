@@ -25,6 +25,10 @@
 #include <features.h>
 #include <bits/libc-header-start.h>
 
+#ifndef __GLIBC_USE
+#define __GLIBC_USE(F) __GLIBC_USE_ ## F
+#endif
+
 /* Get size_t, wchar_t and NULL from <stddef.h>.  */
 #define __need_size_t
 #define __need_wchar_t

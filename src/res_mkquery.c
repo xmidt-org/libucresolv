@@ -96,8 +96,8 @@ typedef __u_int u_int;
 typedef unsigned char __u_char;
 typedef __u_char u_char;
 
-extern int gettimeofday (struct timeval *__tv,
-                         void *__tz);
+/* extern int gettimeofday (struct timeval *__tv, void *__tz); */
+
 #define NS_OPT_DNSSEC_OK        0x8000U
 /*
  * Form all types of queries.

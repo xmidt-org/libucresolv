@@ -25,6 +25,10 @@
 #include <features.h>
 #include <glibc-cdefs.h>
 
+#ifndef __attribute_const__
+#define __attribute_const__
+#endif
+
 /* The system-specific definitions of the E* constants, as macros.  */
 #include <bits/errno.h>
 

@@ -57,6 +57,10 @@
 # include "../locale/localeinfo.h"
 #endif
 
+#ifndef __glibc_unlikely
+#define __glibc_unlikely
+#endif
+
 /* Nonzero if we are defining `strtoul' or `strtoull', operating on
    unsigned integers.  */
 #ifndef UNSIGNED
@@ -108,7 +112,9 @@
 # define LONG long long
 # define STRTOL_LONG_MIN LONG_LONG_MIN
 # define STRTOL_LONG_MAX LONG_LONG_MAX
-# define STRTOL_ULONG_MAX ULONG_LONG_MAX
+/* define STRTOL_ULONG_MAX ULONG_LONG_MAX */
+# define STRTOL_ULONG_MAX	18446744073709551615ULL
+
 #else
 # define LONG long
 

@@ -59,6 +59,9 @@
 #ifndef libc_hidden_weak
 # define libc_hidden_weak(name)
 #endif
+#ifndef __glibc_unlikely
+#define __glibc_unlikely
+#endif
 
 #ifdef __cplusplus
 extern "C" {

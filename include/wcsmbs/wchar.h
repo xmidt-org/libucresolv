@@ -29,6 +29,10 @@
 /* Gather machine dependent type support.  */
 #include <bits/floatn.h>
 
+#ifndef __GLIBC_USE
+#define __GLIBC_USE(F) __GLIBC_USE_ ## F
+#endif
+
 #define __need_size_t
 #define __need_wchar_t
 #define __need_NULL

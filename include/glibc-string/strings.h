@@ -20,6 +20,11 @@
 
 #include <features.h>
 #include <glibc-cdefs.h>
+
+#ifndef __attribute_const__
+#define __attribute_const__
+#endif
+
 #define __need_size_t
 #include <stddef.h>
 
