@@ -16,7 +16,7 @@ set(PROJ_RESOLV_LIB ucresolv)
 file(GLOB HEADERS ucresolv.h)
 set(SOURCES res_init.c res_query.c res_mkquery.c res_send.c
   gethostname.c inet_pton.c iofgets_u.c inet6_scopeid_pton.c
-  inet_addr.c inet_mkadr.c if_index.c
+  inet_addr.c inet_mkadr.c if_index.c mempcpy.c
   ../include/glibc-stdlib/strtoull_l.c
   ../include/glibc-stdlib/strtol_l.c
   ../include/glibc-stdlib/grouping.c
