@@ -34,7 +34,7 @@
 
 #include <stddef.h>
 
-#include <errno.h>
+#include <glibc-errno.h>
 #ifndef __set_errno
 # define __set_errno(Val) errno = (Val)
 #endif
@@ -46,7 +46,7 @@
 
 #include <math_ldbl_opt.h>
 
-#include "iolibio.h"
+#include <glibc-libio/iolibio.h>
 
 /* Control of exported symbols.  Used in glibc.  By default we don't
    do anything.  */

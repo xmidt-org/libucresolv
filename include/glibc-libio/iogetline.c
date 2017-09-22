@@ -24,8 +24,13 @@
    This exception applies to code released by its copyright holders
    in files containing the exception.  */
 
-#include "libioP.h"
-#include <string.h>
+#define __OPTIMIZE__ 1
+#include <libc-symbols.h>
+#include <stdint.h>
+#include <glibc-errno.h>
+#include <glibc-libio/libioP.h>
+#include <glibc-stdio.h>
+#include <glibc-string.h>
 
 _IO_size_t
 _IO_getline (_IO_FILE *fp, char *buf, _IO_size_t n, int delim,

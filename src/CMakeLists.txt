@@ -20,6 +20,7 @@ set(SOURCES res_init.c res_query.c res_mkquery.c res_send.c
   ../include/glibc-stdlib/strtoull_l.c
   ../include/glibc-stdlib/strtol_l.c
   ../include/glibc-stdlib/grouping.c
+  ../include/glibc-libio/iogetline.c
   ../include/locale/xlocale.c
   ../include/locale/C-address.c
   ../include/locale/C-collate.c
