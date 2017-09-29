@@ -15,16 +15,20 @@
  * OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#define __OPTIMIZE__ 1
+#include <libc-symbols.h>
+
 #include <sys/types.h>
 
 #include <netinet/in.h>
-#include <arpa/nameser.h>
+#include <glibc-arpa/inet.h>
+#include <glibc-arpa/nameser.h>
 
-#include <errno.h>
+#include <glibc-errno.h>
 #include <resolv.h>
-#include <string.h>
-#include <ctype.h>
-#include <stdlib.h>
+#include <glibc-string.h>
+#include <glibc-ctype.h>
+#include <glibc-stdlib/stdlib.h>
 #include <limits.h>
 
 # define SPRINTF(x) ((size_t)sprintf x)

@@ -15,12 +15,12 @@ set(PROJ_RESOLV_LIB ucresolv)
 
 file(GLOB HEADERS ucresolv.h)
 set(SOURCES res_init.c res_query.c res_mkquery.c res_send.c
-  gethostname.c inet_pton.c iofgets_u.c inet6_scopeid_pton.c
+  inet_pton.c inet6_scopeid_pton.c
   inet_addr.c inet_mkadr.c if_index.c mempcpy.c
   ../include/glibc-stdlib/strtoull_l.c
   ../include/glibc-stdlib/strtol_l.c
   ../include/glibc-stdlib/grouping.c
-  ../include/glibc-libio/iogetline.c
+  ../include/resolv/ns_name.c
   ../include/locale/xlocale.c
   ../include/locale/C-address.c
   ../include/locale/C-collate.c
@@ -36,6 +36,13 @@ set(SOURCES res_init.c res_query.c res_mkquery.c res_send.c
   ../include/locale/C-time.c
   ../include/locale/C_name.c
 )
+
+#  gethostname.c
+#  iofgets_u.c
+#  ../include/glibc-libio/iogetline.c
+#  ../include/glibc-libio/genops.c
+#  ../include/glibc-libio/vtables.c
+#  ../include/glibc-libio/stdfiles.c
 
 add_library(${PROJ_RESOLV_LIB} STATIC ${HEADERS} ${SOURCES})
 add_library(${PROJ_RESOLV_LIB}.shared SHARED ${HEADERS} ${SOURCES})

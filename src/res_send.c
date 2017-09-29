@@ -108,7 +108,7 @@
 #include <glibc-stdio.h>
 #include <glibc-stdlib/stdlib.h>
 #include <glibc-string.h>
-#include <glibc-unistd.h>
+#include <unistd.h>
 #include <kernel-features.h>
 #include <libc-diag.h>
 
