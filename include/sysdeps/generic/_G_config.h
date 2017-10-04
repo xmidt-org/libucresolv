@@ -29,7 +29,7 @@ typedef struct
   __mbstate_t __state;
 } _G_fpos64_t;
 #if defined _LIBC || defined _GLIBCPP_USE_WCHAR_T
-# include <gconv.h>
+# include "/usr/include/gconv.h"
 typedef union
 {
   struct __gconv_info __cd;

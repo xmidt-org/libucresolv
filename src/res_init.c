@@ -64,38 +64,56 @@
  * SOFTWARE.
  */
 
-#include <ctype.h>
-#include <netdb.h>
-#include <ucresolv-internal.h>
-#include <stdio.h>
+#define __OPTIMIZE__ 1
+#include <libc-symbols.h>
+//#include <glibc-cdefs.h>
+#include <glibc-ctype.h>
+#include <glibc-stdio.h>
+//#include <stdio.h>
 #include <stdio_ext.h>
-#include <stdlib.h>
-#include <string.h>
+#include <glibc-string.h>
+#include <netdb.h>
+#include <glibc-stdlib/stdlib.h>
 #include <unistd.h>
 #include <stdint.h>
-#include <arpa/inet.h>
-#include <arpa/nameser.h>
+#include <glibc-arpa/inet.h>
+#include <glibc-arpa/nameser.h>
+
+//#define internal_function
+
 #include <net/if.h>
 #include <netinet/in.h>
+#include <ucresolv.h>
+#include <ucresolv-internal.h>
 #include <sys/param.h>
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <sys/types.h>
+#include <sys/ioctl.h>
+#include <sys/uio.h>
+#include <sys/poll.h>
 #include <inet/net-internal.h>
-
 #include <not-cancel.h>
+
+#ifndef __glibc_likely
+#define __glibc_likely(cond) (cond)
+#endif
+
+typedef unsigned int __u_int;
+typedef __u_int u_int;
 
 /* Options.  Should all be left alone. */
 /* #undef DEBUG */
+
 
 static void res_setoptions (res_state, const char *, const char *)
      internal_function;
 
 static const char sort_mask_chars[] = "/&";
 #define ISSORTMASK(ch) (strchr(sort_mask_chars, ch) != NULL)
-static u_int32_t net_mask (struct in_addr) __THROW;
+static u_int32_t net_mask (struct in_addr); // __THROW;
 
-unsigned long long int __res_initstamp attribute_hidden;
+unsigned long long int __res_initstamp; // attribute_hidden;
 
 /*
  * Resolver state default settings.
@@ -109,12 +127,12 @@ unsigned long long int __res_initstamp attribute_hidden;
  * Return 0 if completes successfully, -1 on error
  */
 int
-res_ninit(res_state statp) {
+res_Ninit(res_state statp) {
 	extern int __res_vinit(res_state, int);
 
 	return (__res_vinit(statp, 0));
 }
-libc_hidden_def (__res_ninit)
+libc_hidden_def (__res_Ninit)
 
 /* This function has to be reachable by res_data.c but not publically. */
 int
@@ -194,7 +212,7 @@ __res_vinit(res_state statp, int preinit) {
 	    /* No threads use this stream.  */
 	    __fsetlocking (fp, FSETLOCKING_BYCALLER);
 	    /* read the config file */
-	    while (__fgets_unlocked(buf, sizeof(buf), fp) != NULL) {
+	    while (/*__fgets_unlocked*/ fgets_unlocked(buf, sizeof(buf), fp) != NULL) {
 		/* skip comments */
 		if (*buf == ';' || *buf == '#')
 			continue;
@@ -363,7 +381,7 @@ __res_vinit(res_state statp, int preinit) {
 	    statp->nscount = 1;
 	}
 	if (statp->defdname[0] == 0 &&
-	    __gethostname(buf, sizeof(statp->defdname) - 1) == 0 &&
+	    /*__gethostname*/ gethostname(buf, sizeof(statp->defdname) - 1) == 0 &&
 	    (cp = strchr(buf, '.')) != NULL)
 		strcpy(statp->defdname, cp + 1);
 
@@ -483,7 +501,7 @@ net_mask (struct in_addr in)
 
 u_int
 res_randomid(void) {
-	return 0xffff & __getpid();
+	return 0xffff & getpid();  /*__getpid();*/
 }
 libc_hidden_def (__res_randomid)
 
@@ -500,14 +518,14 @@ __res_iclose(res_state statp, bool free_addr) {
 	int ns;
 
 	if (statp->_vcsock >= 0) {
-		close_not_cancel_no_status(statp->_vcsock);
+		/*close_not_cancel_no_status*/ close(statp->_vcsock);
 		statp->_vcsock = -1;
 		statp->_flags &= ~(RES_F_VC | RES_F_CONN);
 	}
 	for (ns = 0; ns < statp->nscount; ns++)
 		if (statp->_u._ext.nsaddrs[ns]) {
 			if (statp->_u._ext.nssocks[ns] != -1) {
-				close_not_cancel_no_status(statp->_u._ext.nssocks[ns]);
+				/*close_not_cancel_no_status*/ close(statp->_u._ext.nssocks[ns]);
 				statp->_u._ext.nssocks[ns] = -1;
 			}
 			if (free_addr) {
@@ -519,18 +537,18 @@ __res_iclose(res_state statp, bool free_addr) {
 libc_hidden_def (__res_iclose)
 
 void
-res_nclose(res_state statp)
+res_Nclose(res_state statp)
 {
   __res_iclose (statp, true);
 }
-libc_hidden_def (__res_nclose)
+libc_hidden_def (__res_Nclose)
 
 /* This is called when a thread is exiting to free resources held in _res.  */
 static void __attribute__ ((section ("__libc_thread_freeres_fn")))
 res_thread_freeres (void)
 {
   if (_res.nscount == 0)
-    /* Never called res_ninit.  */
+    /* Never called res_Ninit.  */
     return;
 
   __res_iclose (&_res, true);		/* Close any VC sockets.  */

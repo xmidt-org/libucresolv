@@ -93,23 +93,24 @@
 #include <sys/uio.h>
 #include <sys/poll.h>
 
+#define __OPTIMIZE__ 1
+#include <libc-symbols.h>
 #include <netinet/in.h>
-#include <arpa/nameser.h>
-#include <arpa/inet.h>
+#include <glibc-arpa/nameser.h>
+#include <glibc-arpa/inet.h>
 #include <sys/ioctl.h>
 
-#include <errno.h>
 #include <fcntl.h>
 #include <netdb.h>
-#include <ucresolv-internal.h>
+#include "ucresolv-internal.h"
 #include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <glibc-errno.h>
+#include <glibc-stdio.h>
+#include <glibc-stdlib/stdlib.h>
+#include <glibc-string.h>
 #include <unistd.h>
 #include <kernel-features.h>
 #include <libc-diag.h>
-#include <errno.h>
 
 #if PACKETSZ > 65536
 #define MAXPACKET       PACKETSZ
@@ -118,7 +119,7 @@
 #endif
 
 #define libresolv_hidden_def(name)
-#define __set_errno(err) printf("error : %d,func : %s:%d\n",err,__FUNCTION__,__LINE__)
+#define __show_errno(err) printf("error : %d,func : %s:%d\n",err,__FUNCTION__,__LINE__)
 
 #ifndef __glibc_likely
 #define __glibc_likely
@@ -127,6 +128,11 @@
 #ifndef __glibc_unlikely
 #define __glibc_unlikely
 #endif
+
+typedef unsigned short __u_short;
+typedef __u_short u_short;
+typedef unsigned char __u_char;
+typedef __u_char u_char;
 
 
 #ifndef _BUILD_NON_YOCTO
@@ -141,6 +147,8 @@ extern int __sendmmsg (int __fd, struct mmsghdr *__vmessages,
                        unsigned int __vlen, int __flags);
 
 extern int poll (struct pollfd *fds, nfds_t nfds, int timeout);
+
+extern void res_Nclose(res_state statp);
 
 /* From ev_streams.c.  */
 
@@ -391,12 +399,12 @@ __libc_res_nsend(res_state statp, const u_char *buf, int buflen,
   int gotsomewhere, terrno, try, v_circuit, resplen, ns, n;
 printf("__libc_res_nsend\n");
 	if (statp->nscount == 0) {
-		__set_errno (ESRCH);
+		__show_errno (ESRCH);
 		return (-1);
 	}
 
 	if (anssiz < (buf2 == NULL ? 1 : 2) * HFIXEDSZ) {
-		__set_errno (EINVAL);
+		__show_errno (EINVAL);
 		return (-1);
 	}
 
@@ -430,7 +438,7 @@ printf("__libc_res_nsend\n");
 			}
 		if (needclose) {
 			//__res_iclose(statp, false);
-			res_nclose(statp);
+			res_Nclose(statp);
 			EXT(statp).nscount = 0;
 		}
 	}
@@ -553,21 +561,21 @@ printf("__libc_res_nsend\n");
 		if ((v_circuit && (statp->options & RES_USEVC) == 0) ||
 		    (statp->options & RES_STAYOPEN) == 0) {
 			//__res_iclose(statp, false);
-			res_nclose(statp);
+			res_Nclose(statp);
 		}
 		return (resplen);
  next_ns: ;
 	   } /*foreach ns*/
 	} /*foreach retry*/
 	//__res_iclose(statp, false);
-	res_nclose(statp);
+	res_Nclose(statp);
 	if (!v_circuit) {
 		if (!gotsomewhere)
-			__set_errno (ECONNREFUSED);	/* no nameservers found */
+			__show_errno (ECONNREFUSED);	/* no nameservers found */
 		else
-			__set_errno (ETIMEDOUT);	/* no answer obtained */
+			__show_errno (ETIMEDOUT);	/* no answer obtained */
 	} else
-		__set_errno (terrno);
+		__show_errno (terrno);
 	return (-1);
 }
 
@@ -604,7 +612,7 @@ __attribute__ ((warn_unused_result))
 close_and_return_error (res_state statp, int *resplen2)
 {
   //__res_iclose(statp, false);
-  res_nclose(statp);
+  res_Nclose(statp);
   if (resplen2 != NULL)
     *resplen2 = 0;
   return 0;
@@ -725,7 +733,7 @@ send_vc(res_state statp,
 				(struct sockaddr *)&peer, &size) < 0 ||
 		    !sock_eq(&peer, (struct sockaddr_in6 *) nsap)) {
 			//__res_iclose(statp, false);
-			res_nclose(statp);
+			res_Nclose(statp);
 			statp->_flags &= ~RES_F_VC;
 		}
 	}
@@ -733,7 +741,7 @@ send_vc(res_state statp,
 	if (statp->_vcsock < 0 || (statp->_flags & RES_F_VC) == 0) {
 		if (statp->_vcsock >= 0)
 		  //__res_iclose(statp, false);
-			res_nclose(statp);
+			res_Nclose(statp);
 
 		statp->_vcsock = socket(nsap->sa_family, SOCK_STREAM, 0);
 		if (statp->_vcsock < 0) {
@@ -743,7 +751,7 @@ send_vc(res_state statp,
 			  *resplen2 = 0;
 			return (-1);
 		}
-		__set_errno (0);
+		__show_errno (0);
 		if (connect(statp->_vcsock, nsap,
 			    nsap->sa_family == AF_INET
 			    ? sizeof (struct sockaddr_in)
@@ -807,7 +815,7 @@ send_vc(res_state statp,
 		if (*terrno == ECONNRESET && !connreset)
 		  {
 		    //__res_iclose(statp, false);
-			res_nclose(statp);
+			res_Nclose(statp);
 		    connreset = 1;
 		    goto same_ns;
 		  }
@@ -986,7 +994,7 @@ reopen (res_state statp, int *terrno, int ns)
 		DIAG_POP_NEEDS_COMMENT;
 			Aerror(statp, stderr, "connect(dg)", errno, nsap);
 			//__res_iclose(statp, false);
-			res_nclose(statp);
+			res_Nclose(statp);
 			return (0);
 		}
 	}
@@ -1091,6 +1099,7 @@ send_dg(res_state statp,
 	  {
 	    if (resplen2 != NULL)
 	      *resplen2 = 0;
+			printf ("send_dg rtn 1 retry_reopen\n");
 	    return retval;
 	  }
  retry:
@@ -1112,6 +1121,7 @@ send_dg(res_state statp,
 		if (evCmpTime(finish, now) <= 0) {
 		poll_err_out:
 			Perror(statp, stderr, "poll", errno);
+			printf ("send_dg rtn 2 recompute_resend\n");
 			return close_and_return_error (statp, resplen2);
 		}
 		evSubTime(&timeout, &finish, &now);
@@ -1151,17 +1161,19 @@ send_dg(res_state statp,
 			single_request_reopen = true;
 			*gotsomewhere = save_gotsomewhere;
 			//__res_iclose(statp, false);
-			res_nclose(statp);
+			res_Nclose(statp);
 			goto retry_reopen;
 		      }
 
 		    *resplen2 = 1;
+				printf ("send_dg rtn 3 return resplen\n");
 		    return resplen;
 		  }
 
 		*gotsomewhere = 1;
 		if (resplen2 != NULL)
 		  *resplen2 = 0;
+    printf ("send_dg rtn 4 return 0\n");
 		return 0;
 	}
 	if (n < 0) {
@@ -1170,7 +1182,7 @@ send_dg(res_state statp,
 
 		goto poll_err_out;
 	}
-	__set_errno (0);
+	__show_errno (0);
 	if (pfd[0].revents & POLLOUT) {
 #ifndef __ASSUME_SENDMMSG
 		static int have_sendmmsg;
@@ -1230,6 +1242,7 @@ send_dg(res_state statp,
 
 		      fail_sendmmsg:
 			Perror(statp, stderr, "sendmmsg", errno);
+			printf ("send_dg rtn 5 close and rtn error\n");
 			return close_and_return_error (statp, resplen2);
 		      }
 		  }
@@ -1251,6 +1264,7 @@ printf("sr : %d\n", (int)sr);
 		      if (errno == EINTR || errno == EAGAIN)
 			goto recompute_resend;
 		      Perror(statp, stderr, "send", errno);
+					printf ("send_dg rtn 6 close and rtn error\n");
 		      return close_and_return_error (statp, resplen2);
 		    }
 		  just_one:
@@ -1330,6 +1344,7 @@ printf("sr : %d\n", (int)sr);
 				goto wait;
 			}
 			Perror(statp, stderr, "recvfrom", errno);
+			printf ("send_dg rtn 7 close and rtn error\n");
 			return close_and_return_error (statp, resplen2);
 		}
 		printf("..done\n");
@@ -1343,6 +1358,7 @@ printf("sr : %d\n", (int)sr);
 			       (stdout, ";; undersized: %d\n",
 				*thisresplenp));
 			*terrno = EMSGSIZE;
+			printf ("send_dg rtn 8 Undersized\n");
 			return close_and_return_error (statp, resplen2);
 		}
 		if ((recvresp1 || hp->id != anhp->id)
@@ -1413,6 +1429,7 @@ printf("sr : %d\n", (int)sr);
 		next_ns:
 			if (recvresp1 || (buf2 != NULL && recvresp2)) {
 			  *resplen2 = 0;
+				printf ("send_dg rtn 9 next_ns\n");
 			  return resplen;
 			}
 			if (buf2 != NULL)
@@ -1433,7 +1450,7 @@ printf("sr : %d\n", (int)sr);
 			if (!statp->pfcode)
 			  return close_and_return_error (statp, resplen2);
 			//__res_iclose(statp, false);
-			res_nclose(statp);
+			res_Nclose(statp);
 		}
 		if (anhp->rcode == NOERROR && anhp->ancount == 0
 		    && anhp->aa == 0 && anhp->ra == 0 && anhp->arcount == 0) {
@@ -1455,11 +1472,12 @@ printf("sr : %d\n", (int)sr);
 			       (stdout, ";; truncated answer\n"));
 			*v_circuit = 1;
 			//__res_iclose(statp, false);
-			res_nclose(statp);
+			res_Nclose(statp);
 			// XXX if we have received one reply we could
 			// XXX use it and not repeat it over TCP...
 			if (resplen2 != NULL)
 			  *resplen2 = 0;
+			printf ("send_dg rtn 10 after res_Nclose\n");
 			return (1);
 		}
 		/* Mark which reply we received.  */
@@ -1473,12 +1491,13 @@ printf("sr : %d\n", (int)sr);
 				pfd[0].events = POLLOUT;
 				if (single_request_reopen) {
 					//__res_iclose(statp, false);
-					res_nclose(statp);
+					res_Nclose(statp);
 					retval = reopen (statp, terrno, ns);
 					if (retval <= 0)
 					  {
 					    if (resplen2 != NULL)
 					      *resplen2 = 0;
+							printf ("send_dg rtn 11 after res_Nclose and reopen\n");
 					    return retval;
 					  }
 					pfd[0].fd = EXT(statp).nssocks[ns];
@@ -1488,12 +1507,15 @@ printf("sr : %d\n", (int)sr);
 		}
 		/* All is well.  We have received both responses (if
 		   two responses were requested).  */
+		printf ("send_dg rtn 12 all is well\n");
 		return (resplen);
-	} else if (pfd[0].revents & (POLLERR | POLLHUP | POLLNVAL))
+	} else if (pfd[0].revents & (POLLERR | POLLHUP | POLLNVAL)) {
 	  /* Something went wrong.  We can stop trying.  */
+		printf ("send_dg rtn 13 stop trying\n");
 	  return close_and_return_error (statp, resplen2);
-	else {
+	} else {
 		/* poll should not have returned > 0 in this case.  */
+		printf ("send_dg abort\n");
 		abort ();
 	}
 }
@@ -1524,7 +1546,7 @@ Aerror(const res_state statp, FILE *file, const char *string, int error,
 			 : 0),
 			strerror(error));
 	}
-	__set_errno (save);
+	__show_errno (save);
 }
 
 static void
