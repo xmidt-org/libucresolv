@@ -1,10 +1,10 @@
 /* No floating-point inline functions in rtld and for the conform tests.  */
-#define IS_IN(lib) (IN_MODULE == MODULE_##lib)
+#define STDLIB_FLOAT_IS_IN(lib) (IN_MODULE == MODULE_##lib)
 
 #ifdef _ISOMAC
-# include <stdlib/bits/stdlib-float.h>
+# include <glibc-stdlib/bits/stdlib-float.h>
 #else
-#if !IS_IN (rtld)
-#  include <stdlib/bits/stdlib-float.h>
+#if !STDLIB_FLOAT_IS_IN (rtld)
+#  include <glibc-stdlib/bits/stdlib-float.h>
 #endif
 #endif

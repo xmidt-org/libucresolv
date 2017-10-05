@@ -1,5 +1,5 @@
 #ifndef	_SYS_UTSNAME_H
-#include <posix/sys/utsname.h>
+#include <glibc-posix/sys/utsname.h>
 
 #ifndef _ISOMAC
 extern int __uname (struct utsname *__name);

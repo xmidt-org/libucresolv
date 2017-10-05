@@ -14,7 +14,28 @@
 set(PROJ_RESOLV_LIB ucresolv)
 
 file(GLOB HEADERS ucresolv.h)
-set(SOURCES res_query.c res_mkquery.c res_send.c)
+set(SOURCES res_init.c res_query.c res_mkquery.c res_send.c
+  inet_pton.c inet6_scopeid_pton.c
+  inet_addr.c inet_mkadr.c if_index.c mempcpy.c
+  ../include/glibc-stdlib/strtoull_l.c
+  ../include/glibc-stdlib/strtol_l.c
+  ../include/glibc-stdlib/grouping.c
+  ../include/resolv/ns_name.c
+  ../include/locale/xlocale.c
+  ../include/locale/C-address.c
+  ../include/locale/C-collate.c
+  ../include/locale/C-ctype.c
+  ../include/locale/C-identification.c
+  ../include/locale/C-measurement.c
+  ../include/locale/C-messages.c
+  ../include/locale/C-monetary.c
+  ../include/locale/C-name.c
+  ../include/locale/C-numeric.c
+  ../include/locale/C-paper.c
+  ../include/locale/C-telephone.c
+  ../include/locale/C-time.c
+  ../include/locale/C_name.c
+)
 
 add_library(${PROJ_RESOLV_LIB} STATIC ${HEADERS} ${SOURCES})
 add_library(${PROJ_RESOLV_LIB}.shared SHARED ${HEADERS} ${SOURCES})
