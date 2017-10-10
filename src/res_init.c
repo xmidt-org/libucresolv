@@ -127,12 +127,13 @@ unsigned long long int __res_initstamp; // attribute_hidden;
  * Return 0 if completes successfully, -1 on error
  */
 int
-res_Ninit(res_state statp) {
+res_ninit(res_state statp) {
 	extern int __res_vinit(res_state, int);
 
+	printf ("UCLIBC res_ninit\n");
 	return (__res_vinit(statp, 0));
 }
-libc_hidden_def (__res_Ninit)
+libc_hidden_def (__res_ninit)
 
 /* This function has to be reachable by res_data.c but not publically. */
 int
@@ -537,11 +538,12 @@ __res_iclose(res_state statp, bool free_addr) {
 libc_hidden_def (__res_iclose)
 
 void
-res_Nclose(res_state statp)
+res_nclose(res_state statp)
 {
+	printf ("UCLIBC res_nclose\n");
   __res_iclose (statp, true);
 }
-libc_hidden_def (__res_Nclose)
+libc_hidden_def (__res_nclose)
 
 /* This is called when a thread is exiting to free resources held in _res.  */
 static void __attribute__ ((section ("__libc_thread_freeres_fn")))

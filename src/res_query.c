@@ -140,7 +140,7 @@ __libc_res_Nquery(res_state statp,
 	HEADER *hp = (HEADER *) answer;
 	HEADER *hp2;
 	int n, use_malloc = 0;
-printf("\nres_Nquery...\n");
+printf("\n__libc_res_Nquery...\n");
 	size_t bufsize = (type == T_QUERY_A_AND_AAAA ? 2 : 1) * QUERYSIZE;
 	u_char *buf = alloca (bufsize);
 	u_char *query1 = buf;
@@ -328,16 +328,17 @@ printf("Count = %d\n",statp->nscount);
 libresolv_hidden_def (__libc_res_Nquery)
 
 int
-res_Nquery(res_state statp,
+res_nquery(res_state statp,
 	   const char *name,	/* domain name */
 	   int class, int type,	/* class and type of query */
 	   u_char *answer,	/* buffer to put answer */
 	   int anslen)		/* size of answer buffer */
 {
+	printf ("UCLIBC res_nquery\n");
 	return __libc_res_Nquery(statp, name, class, type, answer, anslen,
 				 NULL, NULL, NULL, NULL, NULL);
 }
-//libresolv_hidden_def (res_Nquery)
+//libresolv_hidden_def (res_nquery)
 
 /*
  * Formulate a normal query, send, and retrieve answer in supplied buffer.
@@ -554,12 +555,13 @@ __libc_res_Nsearch(res_state statp,
 libresolv_hidden_def (__libc_res_Nsearch)
 
 int
-res_Nsearch(res_state statp,
+res_nsearch(res_state statp,
 	    const char *name,	/* domain name */
 	    int class, int type,	/* class and type of query */
 	    u_char *answer,	/* buffer to put answer */
 	    int anslen)		/* size of answer */
 {
+	printf ("UCLIBC res_nsearch\n");
 	return __libc_res_Nsearch(statp, name, class, type, answer,
 				  anslen, NULL, NULL, NULL, NULL, NULL);
 }
@@ -617,18 +619,19 @@ __libc_res_Nquerydomain(res_state statp,
 }
 
 int
-res_Nquerydomain(res_state statp,
+res_nquerydomain(res_state statp,
 	    const char *name,
 	    const char *domain,
 	    int class, int type,	/* class and type of query */
 	    u_char *answer,		/* buffer to put answer */
 	    int anslen)		/* size of answer */
 {
+	printf ("UCLIBC res_nquesrydomain\n");
 	return __libc_res_Nquerydomain(statp, name, domain, class, type,
 				       answer, anslen, NULL, NULL, NULL, NULL,
 				       NULL);
 }
-libresolv_hidden_def (res_Nquerydomain)
+libresolv_hidden_def (res_nquerydomain)
 
 const char *
 res_hostalias(const res_state statp, const char *name, char *dst, size_t siz) {
