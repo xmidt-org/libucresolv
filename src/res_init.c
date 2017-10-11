@@ -127,7 +127,7 @@ unsigned long long int __res_initstamp; // attribute_hidden;
  * Return 0 if completes successfully, -1 on error
  */
 int
-res_ninit(res_state statp) {
+__res_ninit(res_state statp) {
 	extern int __res_vinit(res_state, int);
 
 	printf ("UCLIBC res_ninit\n");
@@ -538,7 +538,7 @@ __res_iclose(res_state statp, bool free_addr) {
 libc_hidden_def (__res_iclose)
 
 void
-res_nclose(res_state statp)
+__res_nclose(res_state statp)
 {
 	printf ("UCLIBC res_nclose\n");
   __res_iclose (statp, true);
