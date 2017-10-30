@@ -23,8 +23,6 @@
 #define LEVEL_INFO     1
 #define LEVEL_DEBUG    2
 
-#define LOGGING_MODULE "UCRESOLV"
-
 /**
 * @brief handle log message based on log level
 * 
@@ -38,11 +36,11 @@ extern logger_func_t logger_func;
 
 void register_ucresolv_logger (logger_func_t logger_func_p);
 
-#define ucresolv_error(...) \
-  if (NULL != logger_func) logger_func(LOGGING_MODULE, LEVEL_ERROR, __VA_ARGS__)
-#define ucresolv_info(...) \
-  if (NULL != logger_func) logger_func(LOGGING_MODULE, LEVEL_INFO, __VA_ARGS__)
-#define ucresolv_debug(...) \
-  if (NULL != logger_func) logger_func(LOGGING_MODULE, LEVEL_DEBUG, __VA_ARGS__)
+#define ucresolv_log(level, ...) \
+  if (NULL != logger_func) logger_func("UCRESOLV", level, __VA_ARGS__)
+
+#define ucresolv_error(...) ucresolv_log (LEVEL_ERROR, __VA_ARGS__)
+#define ucresolv_info(...) ucresolv_log (LEVEL_INFO, __VA_ARGS__)
+#define ucresolv_debug(...) ucresolv_log (LEVEL_DEBUG, __VA_ARGS__)
 
 #endif
