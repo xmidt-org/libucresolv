@@ -71,6 +71,7 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <ucresolv-internal.h>
+#include <ucresolv_log.h>
 #include <glibc-stdio.h>
 #include <glibc-string.h>
 #include <glibc-arpa/nameser.h>
@@ -125,7 +126,7 @@ res_nmkquery(res_state statp,
 
 #ifdef DEBUG
 	if (statp->options & RES_DEBUG)
-		printf(";; res_nmkquery(%s, %s, %s, %s)\n",
+		ucresolv_info(";; res_nmkquery(%s, %s, %s, %s)\n",
 		       _res_opcodes[op], dname, p_class(class), p_type(type));
 #endif
 	/*
@@ -228,7 +229,7 @@ __res_nopt(res_state statp,
 
 #ifdef DEBUG
 	if ((statp->options & RES_DEBUG) != 0U)
-		printf(";; res_nopt()\n");
+		ucresolv_info(";; res_nopt()\n");
 #endif
 
 	HEADER *hp = (HEADER *) buf;
@@ -271,7 +272,7 @@ __res_nopt(res_state statp,
 	if (statp->options & RES_USE_DNSSEC) {
 #ifdef DEBUG
 		if (statp->options & RES_DEBUG)
-			printf(";; res_opt()... ENDS0 DNSSEC\n");
+			ucresolv_info(";; res_opt()... ENDS0 DNSSEC\n");
 #endif
 		flags |= NS_OPT_DNSSEC_OK;
 	}

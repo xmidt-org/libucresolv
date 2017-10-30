@@ -25,6 +25,7 @@
 #include <glibc-errno.h>
 #include <glibc-stdio.h>
 #include <glibc-string.h>
+#include <ucresolv_log.h>
 
 /* Forward. */
  
@@ -45,7 +46,7 @@ int
 dn_skipname(const u_char *ptr, const u_char *eom) {
 	const u_char *saveptr = ptr;
 
-	printf ("UCLIBC dn_skipname\n");
+	ucresolv_info ("UCLIBC dn_skipname\n");
 	if (ns_name_skip(&ptr, eom) == -1)
 		return (-1);
 	return (ptr - saveptr);
@@ -56,7 +57,7 @@ int
 ns_skiprr(const u_char *ptr, const u_char *eom, ns_sect section, int count) {
 	const u_char *optr = ptr;
 
-	printf ("UCLIBC ns_skiprr\n");
+	ucresolv_info ("UCLIBC ns_skiprr %d\n", count);
 	for ((void)NULL; count > 0; count--) {
 		int b, rdlength;
 
@@ -80,17 +81,37 @@ libresolv_hidden_def (ns_skiprr)
 
 void show_parse_buf (const u_char *msg, int msglen)
 {  
-  int i, c;
+  int i, o, c;
+  const char prefix[] = "UCLIBC ns_initparse: ";
+#define BUFLEN 72
+	char buf[BUFLEN+1];
+#define ENDBUF() \
+  buf[o] = 0; \
+  ucresolv_info ("%s\n", buf); \
+  o = 0;
+#define BUFPUT(c) \
+  if (o >= BUFLEN) { \
+    ENDBUF() \
+  } \
+  buf[o++] = c;
+
+  o = 0;
+  for (i=0; (c=prefix[i]) != 0; i++) {
+    BUFPUT(c)
+  }
   for (i=0; i<msglen; i++) {
     c = msg[i];
-    if ((c>=' ') && (c<=0x7F))
-      fputc (c, stdout);
-    else {
-      fputc (hex_digits[c>>4], stdout);
-      fputc (hex_digits[c&15], stdout);
+    if ((c>=' ') && (c<=0x7F)) {
+      BUFPUT (c)
+    } else {
+      BUFPUT (hex_digits[c>>4])
+      BUFPUT (hex_digits[c&15])
     }
   }
-  fputc ('\n', stdout);
+  ENDBUF()
+#undef BUFPUT
+#undef ENDBUF
+#undef BUFLEN
 }
 
 int
@@ -98,7 +119,6 @@ ns_initparse(const u_char *msg, int msglen, ns_msg *handle) {
 	const u_char *eom = msg + msglen;
 	int i;
 
-	printf ("UCLIBC ns_initparse: ");	
   show_parse_buf (msg, msglen);
 	memset(handle, 0x5e, sizeof *handle);
 	handle->_msg = msg;
@@ -109,7 +129,7 @@ ns_initparse(const u_char *msg, int msglen, ns_msg *handle) {
 	if (msg + NS_INT16SZ > eom)
 		RETERR(EMSGSIZE);
 	NS_GET16(handle->_flags, msg);
-	printf ("UCLIBC ns_initparse get counts\n");
+	ucresolv_info ("UCLIBC ns_initparse get counts\n");
 	for (i = 0; i < ns_s_max; i++) {
 		if (msg + NS_INT16SZ > eom)
 			RETERR(EMSGSIZE);
@@ -138,6 +158,7 @@ libresolv_hidden_def (ns_initparse)
 
 static void
 setsection(ns_msg *msg, ns_sect sect) {
+  ucresolv_info ("setsection\n");
 	msg->_sect = sect;
 	if (sect == ns_s_max) {
 		msg->_rrnum = -1;

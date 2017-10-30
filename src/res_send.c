@@ -103,6 +103,7 @@
 #include <fcntl.h>
 #include <netdb.h>
 #include "ucresolv-internal.h"
+#include "ucresolv_log.h"
 #include <signal.h>
 #include <glibc-errno.h>
 #include <glibc-stdio.h>
@@ -255,8 +256,9 @@ static int		sock_eq(struct sockaddr_in6 *, struct sockaddr_in6 *);
  */
 int
 res_ourserver_p(const res_state statp, const struct sockaddr_in6 *inp)
-{printf("res_ourserver_p\n");
+{
 	int ns;
+  ucresolv_info("res_ourserver_p\n");
 
 	if (inp->sin6_family == AF_INET) {
 	    struct sockaddr_in *in4p = (struct sockaddr_in *) inp;
@@ -307,7 +309,7 @@ res_nameinquery(const char *name, int type, int class,
 {
 	const u_char *cp = buf + HFIXEDSZ;
 	int qdcount = ntohs(((HEADER*)buf)->qdcount);
-printf("res_nameinquery\n");
+  ucresolv_info("res_nameinquery\n");
 	while (qdcount-- > 0) {
 		char tname[MAXDNAME+1];
 		int n, ttype, tclass;
@@ -345,7 +347,7 @@ int
 res_queriesmatch(const u_char *buf1, const u_char *eom1,
 		 const u_char *buf2, const u_char *eom2)
 {
-	printf("res_queriesmatch\n");
+	ucresolv_info("res_queriesmatch\n");
 	if (buf1 + HFIXEDSZ > eom1 || buf2 + HFIXEDSZ > eom2)
 		return (-1);
 
@@ -381,11 +383,11 @@ res_queriesmatch(const u_char *buf1, const u_char *eom1,
 		NS_GET16(tclass, cp);
 		if (!res_nameinquery(tname, ttype, tclass, buf2, eom2))
 		{
-			printf("res_nameinquery : ret 0\n");
+			ucresolv_info("res_nameinquery : ret 0\n");
 			return (0);
 		}
 	}
-	printf("res_nameinquery : ret 1\n");
+	ucresolv_info("res_nameinquery : ret 1\n");
 	return (1);
 }
 libresolv_hidden_def (res_queriesmatch)
@@ -397,7 +399,7 @@ __libc_res_nsend(res_state statp, const u_char *buf, int buflen,
 		 int *nansp2, int *resplen2, int *ansp2_malloced)
 {
   int gotsomewhere, terrno, try, v_circuit, resplen, ns, n;
-printf("__libc_res_nsend\n");
+  ucresolv_info("__libc_res_nsend\n");
 	if (statp->nscount == 0) {
 		__show_errno (ESRCH);
 		return (-1);
@@ -593,7 +595,7 @@ libresolv_hidden_def (res_nsend)
 static struct sockaddr *
 get_nsaddr (res_state statp, int n)
 {
-printf("get_nsaddr\n");
+  ucresolv_info("get_nsaddr\n");
   if (statp->nsaddr_list[n].sin_family == 0 && EXT(statp).nsaddrs[n] != NULL)
     /* EXT(statp).nsaddrs[n] holds an address that is larger than
        struct sockaddr, and user code did not update
@@ -696,7 +698,7 @@ send_vc(res_state statp,
 	int *terrno, int ns, u_char **anscp, u_char **ansp2, int *anssizp2,
 	int *resplen2, int *ansp2_malloced)
 {
-	printf("send_vc\n");
+	ucresolv_info("send_vc\n");
 	const HEADER *hp = (HEADER *) buf;
 	const HEADER *hp2 = (HEADER *) buf2;
 	HEADER *anhp = (HEADER *) *ansp;
@@ -948,7 +950,7 @@ send_vc(res_state statp,
 static int
 reopen (res_state statp, int *terrno, int ns)
 {
-	printf("reopen\n");
+	ucresolv_info("reopen\n");
 	if (EXT(statp).nssocks[ns] == -1) {
 		struct sockaddr *nsap = get_nsaddr (statp, ns);
 		socklen_t slen;
@@ -1069,7 +1071,7 @@ send_dg(res_state statp,
 	int *terrno, int ns, int *v_circuit, int *gotsomewhere, u_char **anscp,
 	u_char **ansp2, int *anssizp2, int *resplen2, int *ansp2_malloced)
 {
-	printf("send_dg\n");
+	ucresolv_info("send_dg\n");
 	const HEADER *hp = (HEADER *) buf;
 	const HEADER *hp2 = (HEADER *) buf2;
 	struct timespec now, timeout, finish;
@@ -1099,7 +1101,7 @@ send_dg(res_state statp,
 	  {
 	    if (resplen2 != NULL)
 	      *resplen2 = 0;
-			printf ("send_dg rtn 1 retry_reopen\n");
+			ucresolv_info ("send_dg rtn 1 retry_reopen\n");
 	    return retval;
 	  }
  retry:
@@ -1121,7 +1123,7 @@ send_dg(res_state statp,
 		if (evCmpTime(finish, now) <= 0) {
 		poll_err_out:
 			Perror(statp, stderr, "poll", errno);
-			printf ("send_dg rtn 2 recompute_resend\n");
+			ucresolv_info ("send_dg rtn 2 recompute_resend\n");
 			return close_and_return_error (statp, resplen2);
 		}
 		evSubTime(&timeout, &finish, &now);
@@ -1166,14 +1168,14 @@ send_dg(res_state statp,
 		      }
 
 		    *resplen2 = 1;
-				printf ("send_dg rtn 3 return resplen\n");
+				ucresolv_info ("send_dg rtn 3 return resplen\n");
 		    return resplen;
 		  }
 
 		*gotsomewhere = 1;
 		if (resplen2 != NULL)
 		  *resplen2 = 0;
-    printf ("send_dg rtn 4 return 0\n");
+    ucresolv_info ("send_dg rtn 4 return 0\n");
 		return 0;
 	}
 	if (n < 0) {
@@ -1242,7 +1244,7 @@ send_dg(res_state statp,
 
 		      fail_sendmmsg:
 			Perror(statp, stderr, "sendmmsg", errno);
-			printf ("send_dg rtn 5 close and rtn error\n");
+			ucresolv_info ("send_dg rtn 5 close and rtn error\n");
 			return close_and_return_error (statp, resplen2);
 		      }
 		  }
@@ -1252,19 +1254,19 @@ send_dg(res_state statp,
 #ifndef __ASSUME_SENDMMSG
 		  try_send:
 #endif
-printf("send...");
+				ucresolv_info("send...");
 		    if (nwritten != 0)
 		      sr = send (pfd[0].fd, buf2, buflen2, MSG_NOSIGNAL);
 		    else
 		      sr = send (pfd[0].fd, buf, buflen, MSG_NOSIGNAL);
-printf("done\n");
-printf("sr : %d\n", (int)sr);
+        ucresolv_info("done\n");
+        ucresolv_info("sr : %d\n", (int)sr);
 		    if (sr != (nwritten != 0 ? buflen2 : buflen)) {
-				printf("ERROR on send\n");
+				ucresolv_info("ERROR on send\n");
 		      if (errno == EINTR || errno == EAGAIN)
 			goto recompute_resend;
 		      Perror(statp, stderr, "send", errno);
-					printf ("send_dg rtn 6 close and rtn error\n");
+					ucresolv_info ("send_dg rtn 6 close and rtn error\n");
 		      return close_and_return_error (statp, resplen2);
 		    }
 		  just_one:
@@ -1334,7 +1336,7 @@ printf("sr : %d\n", (int)sr);
 		HEADER *anhp = (HEADER *) *thisansp;
 		socklen_t fromlen = sizeof(struct sockaddr_in6);
 		assert (sizeof(from) <= fromlen);
-		printf("recvfrom..");
+		ucresolv_info("recvfrom..");
 		*thisresplenp = recvfrom(pfd[0].fd, (char*)*thisansp,
 					 *thisanssizp, 0,
 					(struct sockaddr *)&from, &fromlen);
@@ -1344,21 +1346,21 @@ printf("sr : %d\n", (int)sr);
 				goto wait;
 			}
 			Perror(statp, stderr, "recvfrom", errno);
-			printf ("send_dg rtn 7 close and rtn error\n");
+			ucresolv_info ("send_dg rtn 7 close and rtn error\n");
 			return close_and_return_error (statp, resplen2);
 		}
-		printf("..done\n");
+		ucresolv_info("..done\n");
 		*gotsomewhere = 1;
 		if (__glibc_unlikely (*thisresplenp < HFIXEDSZ))       {
 			/*
 			 * Undersized message.
 			 */
-			 printf("..Undersized\n");
+			ucresolv_info("..Undersized\n");
 			Dprint(statp->options & RES_DEBUG,
 			       (stdout, ";; undersized: %d\n",
 				*thisresplenp));
 			*terrno = EMSGSIZE;
-			printf ("send_dg rtn 8 Undersized\n");
+		  ucresolv_info ("send_dg rtn 8 Undersized\n");
 			return close_and_return_error (statp, resplen2);
 		}
 		if ((recvresp1 || hp->id != anhp->id)
@@ -1368,7 +1370,7 @@ printf("sr : %d\n", (int)sr);
 			 * XXX - potential security hazard could
 			 *	 be detected here.
 			 */
-			 printf("..Old query\n");
+			 ucresolv_info("..Old query\n");
 			DprintQ((statp->options & RES_DEBUG) ||
 				(statp->pfcode & RES_PRF_REPLY),
 				(stdout, ";; old answer:\n"),
@@ -1384,7 +1386,7 @@ printf("sr : %d\n", (int)sr);
 			 * XXX - potential security hazard could
 			 *	 be detected here.
 			 */
-			 printf("..wrong server\n");
+			 ucresolv_info("..wrong server\n");
 			DprintQ((statp->options & RES_DEBUG) ||
 				(statp->pfcode & RES_PRF_REPLY),
 				(stdout, ";; not our server:\n"),
@@ -1407,7 +1409,7 @@ printf("sr : %d\n", (int)sr);
 			 * XXX - potential security hazard could
 			 *	 be detected here.
 			 */
-			 printf("..wrong query\n");
+			 ucresolv_info("..wrong query\n");
 			DprintQ((statp->options & RES_DEBUG) ||
 				(statp->pfcode & RES_PRF_REPLY),
 				(stdout, ";; wrong query name:\n"),
@@ -1419,7 +1421,7 @@ printf("sr : %d\n", (int)sr);
 		if (anhp->rcode == SERVFAIL ||
 		    anhp->rcode == NOTIMP ||
 		    anhp->rcode == REFUSED) {
-				printf("..server rejected\n");
+				ucresolv_info("..server rejected\n");
 			DprintQ(statp->options & RES_DEBUG,
 				(stdout, "server rejected query:\n"),
 				*thisansp,
@@ -1429,12 +1431,12 @@ printf("sr : %d\n", (int)sr);
 		next_ns:
 			if (recvresp1 || (buf2 != NULL && recvresp2)) {
 			  *resplen2 = 0;
-				printf ("send_dg rtn 9 next_ns\n");
+				ucresolv_info ("send_dg rtn 9 next_ns\n");
 			  return resplen;
 			}
 			if (buf2 != NULL)
 			  {
-				  printf("..no data first query\n");
+				  ucresolv_info("..no data first query\n");
 			    /* No data from the first reply.  */
 			    resplen = 0;
 			    /* We are waiting for a possible second reply.  */
@@ -1454,7 +1456,7 @@ printf("sr : %d\n", (int)sr);
 		}
 		if (anhp->rcode == NOERROR && anhp->ancount == 0
 		    && anhp->aa == 0 && anhp->ra == 0 && anhp->arcount == 0) {
-				printf("..referred query\n");
+				ucresolv_info("..referred query\n");
 			DprintQ(statp->options & RES_DEBUG,
 				(stdout, "referred query:\n"),
 				*thisansp,
@@ -1467,7 +1469,7 @@ printf("sr : %d\n", (int)sr);
 			 * To get the rest of answer,
 			 * use TCP with same server.
 			 */
-			 printf("..truncated\n");
+			 ucresolv_info("..truncated\n");
 			Dprint(statp->options & RES_DEBUG,
 			       (stdout, ";; truncated answer\n"));
 			*v_circuit = 1;
@@ -1477,7 +1479,7 @@ printf("sr : %d\n", (int)sr);
 			// XXX use it and not repeat it over TCP...
 			if (resplen2 != NULL)
 			  *resplen2 = 0;
-			printf ("send_dg rtn 10 after res_Nclose\n");
+			ucresolv_info ("send_dg rtn 10 after res_Nclose\n");
 			return (1);
 		}
 		/* Mark which reply we received.  */
@@ -1497,7 +1499,7 @@ printf("sr : %d\n", (int)sr);
 					  {
 					    if (resplen2 != NULL)
 					      *resplen2 = 0;
-							printf ("send_dg rtn 11 after res_Nclose and reopen\n");
+							ucresolv_info ("send_dg rtn 11 after res_Nclose and reopen\n");
 					    return retval;
 					  }
 					pfd[0].fd = EXT(statp).nssocks[ns];
@@ -1507,15 +1509,15 @@ printf("sr : %d\n", (int)sr);
 		}
 		/* All is well.  We have received both responses (if
 		   two responses were requested).  */
-		printf ("send_dg rtn 12 all is well\n");
+		ucresolv_info ("send_dg rtn 12 all is well\n");
 		return (resplen);
 	} else if (pfd[0].revents & (POLLERR | POLLHUP | POLLNVAL)) {
 	  /* Something went wrong.  We can stop trying.  */
-		printf ("send_dg rtn 13 stop trying\n");
+		ucresolv_info ("send_dg rtn 13 stop trying\n");
 	  return close_and_return_error (statp, resplen2);
 	} else {
 		/* poll should not have returned > 0 in this case.  */
-		printf ("send_dg abort\n");
+		ucresolv_info ("send_dg abort\n");
 		abort ();
 	}
 }
@@ -1562,7 +1564,7 @@ Perror(const res_state statp, FILE *file, const char *string, int error) {
 
 static int
 sock_eq(struct sockaddr_in6 *a1, struct sockaddr_in6 *a2) {
-	printf("sock_eq\n");
+	ucresolv_info("sock_eq\n");
 	if (a1->sin6_family == a2->sin6_family) {
 		if (a1->sin6_family == AF_INET)
 			return ((((struct sockaddr_in *)a1)->sin_port ==
