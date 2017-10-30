@@ -13,7 +13,7 @@
 #   limitations under the License.
 set(PROJ_RESOLV_LIB ucresolv)
 
-file(GLOB HEADERS ucresolv.h)
+file(GLOB HEADERS ucresolv.h ucresolv_log.h)
 set(SOURCES res_init.c res_query.c res_mkquery.c res_send.c
   inet_pton.c inet6_scopeid_pton.c inet_addr.c inet_mkadr.c
   if_index.c mempcpy.c ns_parse.c ns_name.c
