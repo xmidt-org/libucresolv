@@ -36,8 +36,9 @@ extern logger_func_t logger_func;
 
 void register_ucresolv_logger (logger_func_t logger_func_p);
 
-#define ucresolv_log(level, ...) \
-  if (NULL != logger_func) logger_func("UCRESOLV", level, __VA_ARGS__)
+#define ucresolv_log(level, ...) do { \
+    if (NULL != logger_func) logger_func("UCRESOLV", level, __VA_ARGS__); \
+  } while (0)
 
 #define ucresolv_error(...) ucresolv_log (LEVEL_ERROR, __VA_ARGS__)
 #define ucresolv_info(...) ucresolv_log (LEVEL_INFO, __VA_ARGS__)

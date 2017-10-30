@@ -110,6 +110,7 @@ __libc_res_nsend(res_state statp, const u_char *buf, int buflen,
 #define __glibc_unlikely 
 #endif
 #define __show_errno(err) ucresolv_info("error : %d,func : %s:%d\n",err,__FUNCTION__,__LINE__)
+
 static int
 __libc_res_Nquerydomain(res_state statp, const char *name, const char *domain,
 			int class, int type, u_char *answer, int anslen,
@@ -141,7 +142,7 @@ __libc_res_Nquery(res_state statp,
 	HEADER *hp = (HEADER *) answer;
 	HEADER *hp2;
 	int n, use_malloc = 0;
-  ucresolv_info("\n__libc_res_Nquery...\n");
+  ucresolv_info("__libc_res_Nquery...\n");
 	size_t bufsize = (type == T_QUERY_A_AND_AAAA ? 2 : 1) * QUERYSIZE;
 	u_char *buf = alloca (bufsize);
 	u_char *query1 = buf;

@@ -120,7 +120,7 @@
 #endif
 
 #define libresolv_hidden_def(name)
-#define __show_errno(err) printf("error : %d,func : %s:%d\n",err,__FUNCTION__,__LINE__)
+#define __show_errno(err) ucresolv_info("error : %d,func : %s:%d\n",err,__FUNCTION__,__LINE__)
 
 #ifndef __glibc_likely
 #define __glibc_likely
