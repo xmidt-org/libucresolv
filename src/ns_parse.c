@@ -53,8 +53,27 @@ dn_skipname(const u_char *ptr, const u_char *eom) {
 }
 libresolv_hidden_def (dn_skipname)
 
+/*
+ * Expand compressed domain name 'comp_dn' to full domain name.
+ * 'msg' is a pointer to the beginning of the message,
+ * 'eomorig' points to the first location after the message,
+ * 'exp_dn' is a pointer to a buffer of size 'length' for the result.
+ * Return size of compressed name or -1 if there was an error.
+ */
 int
-ns_skiprr(const u_char *ptr, const u_char *eom, ns_sect section, int count) {
+dn_expand(const u_char *msg, const u_char *eom, const u_char *src,
+	  char *dst, int dstsiz)
+{
+	int n = ns_name_uncompress(msg, eom, src, dst, (size_t)dstsiz);
+
+	if (n > 0 && dst[0] == '.')
+		dst[0] = '\0';
+	return (n);
+}
+libresolv_hidden_def (dn_expand)
+
+int
+__ns_skiprr(const u_char *ptr, const u_char *eom, ns_sect section, int count) {
 	const u_char *optr = ptr;
 
 	ucresolv_info ("UCLIBC ns_skiprr %d\n", count);
@@ -77,7 +96,14 @@ ns_skiprr(const u_char *ptr, const u_char *eom, ns_sect section, int count) {
 		RETERR(EMSGSIZE);
 	return (ptr - optr);
 }
+libresolv_hidden_def (__ns_skiprr)
+
+int
+ns_skiprr(const u_char *ptr, const u_char *eom, ns_sect section, int count) {
+  return __ns_skiprr (ptr, eom, section, count);
+}
 libresolv_hidden_def (ns_skiprr)
+
 
 void show_parse_buf (const u_char *msg, int msglen)
 {  
@@ -115,7 +141,7 @@ void show_parse_buf (const u_char *msg, int msglen)
 }
 
 int
-ns_initparse(const u_char *msg, int msglen, ns_msg *handle) {
+__ns_initparse(const u_char *msg, int msglen, ns_msg *handle) {
 	const u_char *eom = msg + msglen;
 	int i;
 
@@ -139,7 +165,7 @@ ns_initparse(const u_char *msg, int msglen, ns_msg *handle) {
 		if (handle->_counts[i] == 0)
 			handle->_sections[i] = NULL;
 		else {
-			int b = ns_skiprr(msg, eom, (ns_sect)i,
+			int b = __ns_skiprr(msg, eom, (ns_sect)i,
 					  handle->_counts[i]);
 
 			if (b < 0)
@@ -152,7 +178,80 @@ ns_initparse(const u_char *msg, int msglen, ns_msg *handle) {
 	setsection(handle, ns_s_max);
 	return (0);
 }
+libresolv_hidden_def (__ns_initparse)
+
+int
+ns_initparse(const u_char *msg, int msglen, ns_msg *handle) {
+  return __ns_initparse (msg, msglen, handle);
+}
 libresolv_hidden_def (ns_initparse)
+
+int
+__ns_parserr(ns_msg *handle, ns_sect section, int rrnum, ns_rr *rr) {
+	int b;
+	int tmp;
+
+	/* Make section right. */
+	tmp = section;
+	if (tmp < 0 || section >= ns_s_max)
+		RETERR(ENODEV);
+	if (section != handle->_sect)
+		setsection(handle, section);
+
+	/* Make rrnum right. */
+	if (rrnum == -1)
+		rrnum = handle->_rrnum;
+	if (rrnum < 0 || rrnum >= handle->_counts[(int)section])
+		RETERR(ENODEV);
+	if (rrnum < handle->_rrnum)
+		setsection(handle, section);
+	if (rrnum > handle->_rrnum) {
+		b = __ns_skiprr(handle->_msg_ptr, handle->_eom, section,
+			      rrnum - handle->_rrnum);
+
+		if (b < 0)
+			return (-1);
+		handle->_msg_ptr += b;
+		handle->_rrnum = rrnum;
+	}
+
+	/* Do the parse. */
+	b = dn_expand(handle->_msg, handle->_eom,
+		      handle->_msg_ptr, rr->name, NS_MAXDNAME);
+	if (b < 0)
+		return (-1);
+	handle->_msg_ptr += b;
+	if (handle->_msg_ptr + NS_INT16SZ + NS_INT16SZ > handle->_eom)
+		RETERR(EMSGSIZE);
+	NS_GET16(rr->type, handle->_msg_ptr);
+	NS_GET16(rr->rr_class, handle->_msg_ptr);
+	if (section == ns_s_qd) {
+		rr->ttl = 0;
+		rr->rdlength = 0;
+		rr->rdata = NULL;
+	} else {
+		if (handle->_msg_ptr + NS_INT32SZ + NS_INT16SZ > handle->_eom)
+			RETERR(EMSGSIZE);
+		NS_GET32(rr->ttl, handle->_msg_ptr);
+		NS_GET16(rr->rdlength, handle->_msg_ptr);
+		if (handle->_msg_ptr + rr->rdlength > handle->_eom)
+			RETERR(EMSGSIZE);
+		rr->rdata = handle->_msg_ptr;
+		handle->_msg_ptr += rr->rdlength;
+	}
+	if (++handle->_rrnum > handle->_counts[(int)section])
+		setsection(handle, (ns_sect)((int)section + 1));
+
+	/* All done. */
+	return (0);
+}
+libresolv_hidden_def (__ns_parserr)
+
+int
+ns_parserr(ns_msg *handle, ns_sect section, int rrnum, ns_rr *rr) {
+  return __ns_parserr (handle, section, rrnum, rr);
+}
+libresolv_hidden_def (ns_parserr)
 
 /* Private. */
 
