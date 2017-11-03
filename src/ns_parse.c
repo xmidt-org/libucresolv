@@ -37,21 +37,25 @@ static void	setsection(ns_msg *msg, ns_sect sect);
 
 #define RETERR(err) do { __set_errno (err); return (-1); } while (0)
 
+extern int NS_name_skip(const u_char **ptrptr, const u_char *eom);
+extern int NS_name_uncompress(const u_char *msg, const u_char *eom, const u_char *src,
+		   char *dst, size_t dstsiz);
+
+
 /* Public. */
 
 /*
  * Skip over a compressed domain name. Return the size or -1.
  */
-int
+static int
 dn_skipname(const u_char *ptr, const u_char *eom) {
 	const u_char *saveptr = ptr;
 
 	ucresolv_info ("UCLIBC dn_skipname\n");
-	if (ns_name_skip(&ptr, eom) == -1)
+	if (NS_name_skip(&ptr, eom) == -1)
 		return (-1);
 	return (ptr - saveptr);
 }
-libresolv_hidden_def (dn_skipname)
 
 /*
  * Expand compressed domain name 'comp_dn' to full domain name.
@@ -60,11 +64,11 @@ libresolv_hidden_def (dn_skipname)
  * 'exp_dn' is a pointer to a buffer of size 'length' for the result.
  * Return size of compressed name or -1 if there was an error.
  */
-int
+static int
 dn_expand(const u_char *msg, const u_char *eom, const u_char *src,
 	  char *dst, int dstsiz)
 {
-	int n = ns_name_uncompress(msg, eom, src, dst, (size_t)dstsiz);
+	int n = NS_name_uncompress(msg, eom, src, dst, (size_t)dstsiz);
 
 	if (n > 0 && dst[0] == '.')
 		dst[0] = '\0';
@@ -73,7 +77,7 @@ dn_expand(const u_char *msg, const u_char *eom, const u_char *src,
 libresolv_hidden_def (dn_expand)
 
 int
-__ns_skiprr(const u_char *ptr, const u_char *eom, ns_sect section, int count) {
+NS_skiprr(const u_char *ptr, const u_char *eom, ns_sect section, int count) {
 	const u_char *optr = ptr;
 
 	ucresolv_info ("UCLIBC ns_skiprr %d\n", count);
@@ -96,13 +100,7 @@ __ns_skiprr(const u_char *ptr, const u_char *eom, ns_sect section, int count) {
 		RETERR(EMSGSIZE);
 	return (ptr - optr);
 }
-libresolv_hidden_def (__ns_skiprr)
-
-int
-ns_skiprr(const u_char *ptr, const u_char *eom, ns_sect section, int count) {
-  return __ns_skiprr (ptr, eom, section, count);
-}
-libresolv_hidden_def (ns_skiprr)
+libresolv_hidden_def (NS_skiprr)
 
 
 void show_parse_buf (const u_char *msg, int msglen)
@@ -141,7 +139,7 @@ void show_parse_buf (const u_char *msg, int msglen)
 }
 
 int
-__ns_initparse(const u_char *msg, int msglen, ns_msg *handle) {
+NS_initparse(const u_char *msg, int msglen, ns_msg *handle) {
 	const u_char *eom = msg + msglen;
 	int i;
 
@@ -165,7 +163,7 @@ __ns_initparse(const u_char *msg, int msglen, ns_msg *handle) {
 		if (handle->_counts[i] == 0)
 			handle->_sections[i] = NULL;
 		else {
-			int b = __ns_skiprr(msg, eom, (ns_sect)i,
+			int b = NS_skiprr(msg, eom, (ns_sect)i,
 					  handle->_counts[i]);
 
 			if (b < 0)
@@ -178,16 +176,11 @@ __ns_initparse(const u_char *msg, int msglen, ns_msg *handle) {
 	setsection(handle, ns_s_max);
 	return (0);
 }
-libresolv_hidden_def (__ns_initparse)
+libresolv_hidden_def (NS_initparse)
+
 
 int
-ns_initparse(const u_char *msg, int msglen, ns_msg *handle) {
-  return __ns_initparse (msg, msglen, handle);
-}
-libresolv_hidden_def (ns_initparse)
-
-int
-__ns_parserr(ns_msg *handle, ns_sect section, int rrnum, ns_rr *rr) {
+NS_parserr(ns_msg *handle, ns_sect section, int rrnum, ns_rr *rr) {
 	int b;
 	int tmp;
 
@@ -206,7 +199,7 @@ __ns_parserr(ns_msg *handle, ns_sect section, int rrnum, ns_rr *rr) {
 	if (rrnum < handle->_rrnum)
 		setsection(handle, section);
 	if (rrnum > handle->_rrnum) {
-		b = __ns_skiprr(handle->_msg_ptr, handle->_eom, section,
+		b = NS_skiprr(handle->_msg_ptr, handle->_eom, section,
 			      rrnum - handle->_rrnum);
 
 		if (b < 0)
@@ -245,13 +238,8 @@ __ns_parserr(ns_msg *handle, ns_sect section, int rrnum, ns_rr *rr) {
 	/* All done. */
 	return (0);
 }
-libresolv_hidden_def (__ns_parserr)
+libresolv_hidden_def (NS_parserr)
 
-int
-ns_parserr(ns_msg *handle, ns_sect section, int rrnum, ns_rr *rr) {
-  return __ns_parserr (handle, section, rrnum, rr);
-}
-libresolv_hidden_def (ns_parserr)
 
 /* Private. */
 
