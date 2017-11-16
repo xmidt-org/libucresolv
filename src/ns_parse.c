@@ -143,8 +143,8 @@ NS_initparse(const u_char *msg, int msglen, ns_msg *handle) {
 	const u_char *eom = msg + msglen;
 	int i;
  
-  ucresolv_info ("UCLIBC ns_initparse, handle size %d, msglen %d\n",
-    sizeof (ns_msg), msglen);
+  ucresolv_info ("UCLIBC ns_initparse, handle size %d, msglen %d, msg NULL %d\n",
+    sizeof (ns_msg), msglen, (NULL==msg));
   if (NULL == msg)
     return 0;
   show_parse_buf (msg, msglen);
