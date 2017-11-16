@@ -35,6 +35,7 @@ static void	setsection(ns_msg *msg, ns_sect sect);
 
 /* Macros. */
 
+#define libresolv_hidden_def(name)
 #define RETERR(err) do { __set_errno (err); return (-1); } while (0)
 
 extern int NS_name_skip(const u_char **ptrptr, const u_char *eom);
