@@ -141,16 +141,24 @@ void show_parse_buf (const u_char *msg, int msglen)
 
 int
 NS_initparse(const u_char *msg, int msglen, ns_msg *handle) {
-	const u_char *eom = msg + msglen;
+	const u_char *eom;
 	int i;
- 
+
+  if (NULL == handle) {
+    ucresolv_error ("NULL handle to ns_initparse\n");
+    return 0;
+  } 
+	msg = handle->_msg;
   ucresolv_info ("UCLIBC ns_initparse, handle size %d, msglen %d, msg NULL %d\n",
     sizeof (ns_msg), msglen, (NULL==msg));
   if (NULL == msg)
     return 0;
   show_parse_buf (msg, msglen);
+/*
 	memset((void *) handle, 0x5e, sizeof (ns_msg));
 	handle->_msg = msg;
+*/ 
+	eom = msg + msglen;
 	handle->_eom = eom;
 	if (msg + NS_INT16SZ > eom)
 		RETERR(EMSGSIZE);
