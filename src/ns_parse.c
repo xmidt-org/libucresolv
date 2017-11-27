@@ -141,6 +141,7 @@ void show_parse_buf (const u_char *msg, int msglen)
 
 int
 NS_initparse(const u_char *msg, int msglen, ns_msg *handle) {
+	const u_char *_msg;
 	const u_char *eom;
 	int i;
 
@@ -148,43 +149,43 @@ NS_initparse(const u_char *msg, int msglen, ns_msg *handle) {
     ucresolv_error ("NULL handle to ns_initparse\n");
     return 0;
   } 
-	msg = handle->_msg;
+	_msg = handle->_msg;
   ucresolv_info ("UCLIBC ns_initparse, handle size %d, msglen %d, msg NULL %d\n",
-    sizeof (ns_msg), msglen, (NULL==msg));
-  if (NULL == msg)
+    sizeof (ns_msg), msglen, (NULL==_msg));
+  if (NULL == _msg)
     return 0;
-  show_parse_buf (msg, msglen);
+  show_parse_buf (_msg, msglen);
 /*
 	memset((void *) handle, 0x5e, sizeof (ns_msg));
 	handle->_msg = msg;
 */ 
-	eom = msg + msglen;
+	eom = _msg + msglen;
 	handle->_eom = eom;
-	if (msg + NS_INT16SZ > eom)
+	if (_msg + NS_INT16SZ > eom)
 		RETERR(EMSGSIZE);
-	NS_GET16(handle->_id, msg);
-	if (msg + NS_INT16SZ > eom)
+	NS_GET16(handle->_id, _msg);
+	if (_msg + NS_INT16SZ > eom)
 		RETERR(EMSGSIZE);
-	NS_GET16(handle->_flags, msg);
+	NS_GET16(handle->_flags, _msg);
 	ucresolv_info ("UCLIBC ns_initparse get counts\n");
 	for (i = 0; i < ns_s_max; i++) {
-		if (msg + NS_INT16SZ > eom)
+		if (_msg + NS_INT16SZ > eom)
 			RETERR(EMSGSIZE);
-		NS_GET16(handle->_counts[i], msg);
+		NS_GET16(handle->_counts[i], _msg);
 	}
 	for (i = 0; i < ns_s_max; i++)
 		if (handle->_counts[i] == 0)
 			handle->_sections[i] = NULL;
 		else {
-			int b = NS_skiprr(msg, eom, (ns_sect)i,
+			int b = NS_skiprr(_msg, eom, (ns_sect)i,
 					  handle->_counts[i]);
 
 			if (b < 0)
 				return (-1);
-			handle->_sections[i] = msg;
-			msg += b;
+			handle->_sections[i] = _msg;
+			_msg += b;
 		}
-	if (msg != eom)
+	if (_msg != eom)
 		RETERR(EMSGSIZE);
 	setsection(handle, ns_s_max);
 	return (0);
