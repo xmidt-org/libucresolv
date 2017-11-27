@@ -150,8 +150,10 @@ NS_initparse(const u_char *msg, int msglen, ns_msg *handle) {
     return 0;
   } 
 	_msg = handle->_msg;
-  ucresolv_info ("UCLIBC ns_initparse, handle size %d, msglen %d, msg NULL %d\n",
-    sizeof (ns_msg), msglen, (NULL==_msg));
+  ucresolv_info ("UCLIBC ns_initparse, handle size %d, msglen %d, "
+    "handle msg 0x%xl, msg 0x%xl\n",
+    sizeof (ns_msg), msglen, (unsigned long) handle->_msg,
+    (unsigned long) _msg);
   if (NULL == _msg)
     return 0;
   show_parse_buf (_msg, msglen);
