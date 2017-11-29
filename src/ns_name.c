@@ -52,7 +52,7 @@ static int		labellen(const u_char *);
  *\li	All other domains are returned in non absolute form
  */
 int
-NS_name_ntop(const u_char *src, char *dst, size_t dstsiz)
+__ns_name_ntop(const u_char *src, char *dst, size_t dstsiz)
 {
 	const u_char *cp;
 	char *dn, *eom;
@@ -126,7 +126,7 @@ NS_name_ntop(const u_char *src, char *dst, size_t dstsiz)
 	*dn++ = '\0';
 	return (dn - dst);
 }
-libresolv_hidden_def (NS_name_ntop)
+libresolv_hidden_def (__ns_name_ntop)
 
 
 /*%
@@ -143,7 +143,7 @@ libresolv_hidden_def (NS_name_ntop)
  */
 
 int
-NS_name_pton(const char *src, u_char *dst, size_t dstsiz)
+__ns_name_pton(const char *src, u_char *dst, size_t dstsiz)
 {
 	u_char *label, *bp, *eom;
 	int c, n, escaped;
@@ -242,7 +242,7 @@ NS_name_pton(const char *src, u_char *dst, size_t dstsiz)
 	}
 	return (0);
 }
-libresolv_hidden_def (NS_name_pton)
+libresolv_hidden_def (__ns_name_pton)
 
 
 /*%
@@ -252,7 +252,7 @@ libresolv_hidden_def (NS_name_pton)
  *\li	-1 if it fails, or consumed octets if it succeeds.
  */
 int
-NS_name_unpack(const u_char *msg, const u_char *eom, const u_char *src,
+__ns_name_unpack(const u_char *msg, const u_char *eom, const u_char *src,
 	       u_char *dst, size_t dstsiz)
 {
 	const u_char *srcp, *dstlim;
@@ -323,7 +323,7 @@ NS_name_unpack(const u_char *msg, const u_char *eom, const u_char *src,
 		len = srcp - src;
 	return (len);
 }
-libresolv_hidden_def (NS_name_unpack)
+libresolv_hidden_def (__ns_name_unpack)
 
 
 /*%
@@ -346,7 +346,7 @@ libresolv_hidden_def (NS_name_unpack)
  *	list.
  */
 int
-NS_name_pack(const u_char *src, u_char *dst, int dstsiz,
+__ns_name_pack(const u_char *src, u_char *dst, int dstsiz,
 	     const u_char **dnptrs, const u_char **lastdnptr)
 {
 	u_char *dstp;
@@ -436,7 +436,7 @@ cleanup:
 	}
 	return (dstp - dst);
 }
-libresolv_hidden_def (NS_name_pack)
+libresolv_hidden_def (__ns_name_pack)
 
 
 /*%
@@ -449,19 +449,19 @@ libresolv_hidden_def (NS_name_pack)
  *\li	Root domain returns as "." not "".
  */
 int
-NS_name_uncompress(const u_char *msg, const u_char *eom, const u_char *src,
+__ns_name_uncompress(const u_char *msg, const u_char *eom, const u_char *src,
 		   char *dst, size_t dstsiz)
 {
 	u_char tmp[NS_MAXCDNAME];
 	int n;
 
-	if ((n = NS_name_unpack(msg, eom, src, tmp, sizeof tmp)) == -1)
+	if ((n = __ns_name_unpack(msg, eom, src, tmp, sizeof tmp)) == -1)
 		return (-1);
-	if (NS_name_ntop(tmp, dst, dstsiz) == -1)
+	if (__ns_name_ntop(tmp, dst, dstsiz) == -1)
 		return (-1);
 	return (n);
 }
-libresolv_hidden_def (NS_name_uncompress)
+libresolv_hidden_def (__ns_name_uncompress)
 
 
 /*%
@@ -480,16 +480,16 @@ libresolv_hidden_def (NS_name_uncompress)
  *	is NULL, we don't update the list.
  */
 int
-NS_name_compress(const char *src, u_char *dst, size_t dstsiz,
+__ns_name_compress(const char *src, u_char *dst, size_t dstsiz,
 		 const u_char **dnptrs, const u_char **lastdnptr)
 {
 	u_char tmp[NS_MAXCDNAME];
 
-	if (NS_name_pton(src, tmp, sizeof tmp) == -1)
+	if (__ns_name_pton(src, tmp, sizeof tmp) == -1)
 		return (-1);
-	return (NS_name_pack(tmp, dst, dstsiz, dnptrs, lastdnptr));
+	return (__ns_name_pack(tmp, dst, dstsiz, dnptrs, lastdnptr));
 }
-libresolv_hidden_def (NS_name_compress)
+libresolv_hidden_def (__ns_name_compress)
 
 
 /*%
@@ -499,7 +499,7 @@ libresolv_hidden_def (NS_name_compress)
  *\li	0 on success, -1 (with errno set) on failure.
  */
 int
-NS_name_skip(const u_char **ptrptr, const u_char *eom)
+__ns_name_skip(const u_char **ptrptr, const u_char *eom)
 {
 	const u_char *cp;
 	u_int n;
@@ -527,7 +527,7 @@ NS_name_skip(const u_char **ptrptr, const u_char *eom)
 	*ptrptr = cp;
 	return (0);
 }
-libresolv_hidden_def (NS_name_skip)
+libresolv_hidden_def (__ns_name_skip)
 
 
 /* Private. */
