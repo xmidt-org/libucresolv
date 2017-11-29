@@ -97,7 +97,7 @@ typedef __u_int u_int;
 typedef unsigned char __u_char;
 typedef __u_char u_char;
 
-extern int NS_name_compress(const char *src, u_char *dst, size_t dstsiz,
+extern int __ns_name_compress(const char *src, u_char *dst, size_t dstsiz,
 		 const u_char **dnptrs, const u_char **lastdnptr);
 
 /* extern int gettimeofday (struct timeval *__tv, void *__tz); */
@@ -179,7 +179,7 @@ res_nmkquery(res_state statp,
 		if ((buflen -= QFIXEDSZ) < 0)
 			return (-1);
 	compose:
-		n = NS_name_compress(dname, cp, buflen,
+		n = __ns_name_compress(dname, cp, buflen,
 				     (const u_char **) dnptrs,
 				     (const u_char **) lastdnptr);
 		if (n < 0)
@@ -194,7 +194,7 @@ res_nmkquery(res_state statp,
 		/*
 		 * Make an additional record for completion domain.
 		 */
-		n = NS_name_compress((char *)data, cp, buflen,
+		n = __ns_name_compress((char *)data, cp, buflen,
 				     (const u_char **) dnptrs,
 				     (const u_char **) lastdnptr);
 		if (__glibc_unlikely (n < 0))
