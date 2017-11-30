@@ -259,8 +259,14 @@ int		res_send (const unsigned char *, int, unsigned char *, int)
      __THROW;
 __END_DECLS
 
+#ifdef BUILD_YOCTO
+#define ns_initparse __ns_initparse
+#define ns_parserr   __ns_parserr
+#define ns_name_compress __ns_name_compress
+#endif
+
 #define b64_ntop		__b64_ntop
-#define b64_pton		__b64_pton
+#define b64_pton		__b64_pton  
 #define dn_comp			__dn_comp
 #define dn_count_labels		__dn_count_labels
 #define dn_expand		__dn_expand
