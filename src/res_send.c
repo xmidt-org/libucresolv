@@ -136,7 +136,7 @@ typedef unsigned char __u_char;
 typedef __u_char u_char;
 
 
-#ifndef _BUILD_NON_YOCTO
+#ifdef BUILD_YOCTO
 struct mmsghdr {
         struct msghdr   msg_hdr;
         unsigned int        msg_len;
