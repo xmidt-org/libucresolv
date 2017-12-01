@@ -418,7 +418,7 @@ res_setoptions(res_state statp, const char *options, const char *source) {
 
 #ifdef DEBUG
 	if (statp->options & RES_DEBUG)
-		ucresolv_info(";; res_setoptions(\"%s\", \"%s\")...\n",
+		ucresolv_debug("UCLIBC res_setoptions(\"%s\", \"%s\")...\n",
 		       options, source);
 #endif
 	while (*cp) {
@@ -434,7 +434,7 @@ res_setoptions(res_state statp, const char *options, const char *source) {
 				statp->ndots = RES_MAXNDOTS;
 #ifdef DEBUG
 			if (statp->options & RES_DEBUG)
-				ucresolv_info(";;\tndots=%d\n", statp->ndots);
+				ucresolv_debug("UCLIBC\tndots=%d\n", statp->ndots);
 #endif
 		} else if (!strncmp(cp, "timeout:", sizeof("timeout:") - 1)) {
 			i = atoi(cp + sizeof("timeout:") - 1);
@@ -451,11 +451,11 @@ res_setoptions(res_state statp, const char *options, const char *source) {
 		} else if (!strncmp(cp, "debug", sizeof("debug") - 1)) {
 #ifdef DEBUG
 			if (!(statp->options & RES_DEBUG)) {
-				ucresolv_info(";; res_setoptions(\"%s\", \"%s\")..\n",
+				ucresolv_debug("UCLIBC res_setoptions(\"%s\", \"%s\")..\n",
 				       options, source);
 				statp->options |= RES_DEBUG;
 			}
-			ucresolv_info(";;\tdebug\n");
+			ucresolv_debug("UCLIBC\tdebug\n");
 #endif
 		} else {
 		  static const struct

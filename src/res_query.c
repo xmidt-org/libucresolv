@@ -142,7 +142,7 @@ __libc_res_Nquery(res_state statp,
 	HEADER *hp = (HEADER *) answer;
 	HEADER *hp2;
 	int n, use_malloc = 0;
-  ucresolv_info("__libc_res_Nquery...\n");
+  ucresolv_info("UCLIBC __libc_res_Nquery...\n");
 	size_t bufsize = (type == T_QUERY_A_AND_AAAA ? 2 : 1) * QUERYSIZE;
 	u_char *buf = alloca (bufsize);
 	u_char *query1 = buf;
@@ -155,7 +155,7 @@ __libc_res_Nquery(res_state statp,
 
 #ifdef DEBUG
 	if (statp->options & RES_DEBUG)
-		ucresolv_info(";; res_query(%s, %d, %d)\n", name, class, type);
+		ucresolv_debug("UCLIBC res_query(%s, %d, %d)\n", name, class, type);
 #endif
 
 	if (type == T_QUERY_A_AND_AAAA)
@@ -234,7 +234,7 @@ __libc_res_Nquery(res_state statp,
 	if (__glibc_unlikely (n <= 0))       {
 #ifdef DEBUG
 		if (statp->options & RES_DEBUG)
-			ucresolv_info(";; res_query: mkquery failed\n");
+			ucresolv_debug("UCLIBC res_query: mkquery failed\n");
 #endif
 		RES_SET_H_ERRNO(statp, NO_RECOVERY);
 		if (use_malloc)
@@ -242,7 +242,7 @@ __libc_res_Nquery(res_state statp,
 		return (n);
 	}
 	assert (answerp == NULL || (void *) *answerp == (void *) answer);
-  ucresolv_info("Count = %d\n",statp->nscount);
+  ucresolv_debug("UCLIBC Count = %d\n",statp->nscount);
 	n = __libc_res_nsend(statp, query1, nquery1, query2, nquery2, answer,
 			     anslen, answerp, answerp2, nanswerp2, resplen2,
 			     answerp2_malloced);
@@ -251,7 +251,7 @@ __libc_res_Nquery(res_state statp,
 	if (n < 0) {
 #ifdef DEBUG
 		if (statp->options & RES_DEBUG)
-			ucresolv_info(";; res_query: send error\n");
+			ucresolv_debug("UCLIBC res_query: send error\n");
 #endif
 		RES_SET_H_ERRNO(statp, TRY_AGAIN);
 		return (n);
@@ -284,10 +284,10 @@ __libc_res_Nquery(res_state statp,
 	    && (hp2->rcode != NOERROR || ntohs(hp2->ancount) == 0)) {
 #ifdef DEBUG
 		if (statp->options & RES_DEBUG) {
-			ucresolv_info(";; rcode = %d, ancount=%d\n", hp->rcode,
+			ucresolv_debug("UCLIBC rcode = %d, ancount=%d\n", hp->rcode,
 			    ntohs(hp->ancount));
 			if (hp != hp2)
-			  ucresolv_info(";; rcode2 = %d, ancount2=%d\n", hp2->rcode,
+			  ucresolv_debug("UCLIBC rcode2 = %d, ancount2=%d\n", hp2->rcode,
 				 ntohs(hp2->ancount));
 		}
 #endif
@@ -387,7 +387,7 @@ __libc_res_Nsearch(res_state statp,
 
 #ifdef DEBUG
 	if (statp->options & RES_DEBUG)
-		ucresolv_info("dots=%d, statp->ndots=%d, trailing_dot=%d, name=%s\n",
+		ucresolv_debug("UCLIBC dots=%d, statp->ndots=%d, trailing_dot=%d, name=%s\n",
 		       (int)dots,(int)statp->ndots,(int)trailing_dot,name);
 #endif
 
@@ -591,7 +591,7 @@ __libc_res_Nquerydomain(res_state statp,
 
 #ifdef DEBUG
 	if (statp->options & RES_DEBUG)
-		ucresolv_info(";; res_Nquerydomain(%s, %s, %d, %d)\n",
+		ucresolv_debug("UCLIBC res_Nquerydomain(%s, %s, %d, %d)\n",
 		       name, domain?domain:"<Nil>", class, type);
 #endif
 	if (domain == NULL) {

@@ -258,7 +258,7 @@ int
 res_ourserver_p(const res_state statp, const struct sockaddr_in6 *inp)
 {
 	int ns;
-  ucresolv_info("res_ourserver_p\n");
+  ucresolv_info("UCLIBC res_ourserver_p\n");
 
 	if (inp->sin6_family == AF_INET) {
 	    struct sockaddr_in *in4p = (struct sockaddr_in *) inp;
@@ -309,7 +309,7 @@ res_nameinquery(const char *name, int type, int class,
 {
 	const u_char *cp = buf + HFIXEDSZ;
 	int qdcount = ntohs(((HEADER*)buf)->qdcount);
-  ucresolv_info("res_nameinquery\n");
+  ucresolv_info("UCLIBC res_nameinquery\n");
 	while (qdcount-- > 0) {
 		char tname[MAXDNAME+1];
 		int n, ttype, tclass;
@@ -347,7 +347,7 @@ int
 res_queriesmatch(const u_char *buf1, const u_char *eom1,
 		 const u_char *buf2, const u_char *eom2)
 {
-	ucresolv_info("res_queriesmatch\n");
+	ucresolv_info("UCLIBC res_queriesmatch\n");
 	if (buf1 + HFIXEDSZ > eom1 || buf2 + HFIXEDSZ > eom2)
 		return (-1);
 
@@ -383,11 +383,11 @@ res_queriesmatch(const u_char *buf1, const u_char *eom1,
 		NS_GET16(tclass, cp);
 		if (!res_nameinquery(tname, ttype, tclass, buf2, eom2))
 		{
-			ucresolv_info("res_nameinquery : ret 0\n");
+			ucresolv_debug("UCLIBC res_nameinquery : ret 0\n");
 			return (0);
 		}
 	}
-	ucresolv_info("res_nameinquery : ret 1\n");
+	ucresolv_debug("UCLIBC res_nameinquery : ret 1\n");
 	return (1);
 }
 libresolv_hidden_def (res_queriesmatch)
@@ -399,7 +399,7 @@ __libc_res_nsend(res_state statp, const u_char *buf, int buflen,
 		 int *nansp2, int *resplen2, int *ansp2_malloced)
 {
   int gotsomewhere, terrno, try, v_circuit, resplen, ns, n;
-  ucresolv_info("__libc_res_nsend\n");
+  ucresolv_info("UCLIBC __libc_res_nsend\n");
 	if (statp->nscount == 0) {
 		__show_errno (ESRCH);
 		return (-1);
@@ -698,7 +698,7 @@ send_vc(res_state statp,
 	int *terrno, int ns, u_char **anscp, u_char **ansp2, int *anssizp2,
 	int *resplen2, int *ansp2_malloced)
 {
-	ucresolv_info("send_vc\n");
+	ucresolv_info("UCLIBC send_vc\n");
 	const HEADER *hp = (HEADER *) buf;
 	const HEADER *hp2 = (HEADER *) buf2;
 	HEADER *anhp = (HEADER *) *ansp;
@@ -950,7 +950,7 @@ send_vc(res_state statp,
 static int
 reopen (res_state statp, int *terrno, int ns)
 {
-	ucresolv_info("reopen\n");
+	ucresolv_info("UCLIBC reopen\n");
 	if (EXT(statp).nssocks[ns] == -1) {
 		struct sockaddr *nsap = get_nsaddr (statp, ns);
 		socklen_t slen;
@@ -1071,7 +1071,7 @@ send_dg(res_state statp,
 	int *terrno, int ns, int *v_circuit, int *gotsomewhere, u_char **anscp,
 	u_char **ansp2, int *anssizp2, int *resplen2, int *ansp2_malloced)
 {
-	ucresolv_info("send_dg\n");
+	ucresolv_info("UCLIBC send_dg\n");
 	const HEADER *hp = (HEADER *) buf;
 	const HEADER *hp2 = (HEADER *) buf2;
 	struct timespec now, timeout, finish;
@@ -1101,7 +1101,7 @@ send_dg(res_state statp,
 	  {
 	    if (resplen2 != NULL)
 	      *resplen2 = 0;
-			ucresolv_info ("send_dg rtn 1 retry_reopen\n");
+			ucresolv_debug ("UCLIBC send_dg rtn 1 retry_reopen\n");
 	    return retval;
 	  }
  retry:
@@ -1123,7 +1123,7 @@ send_dg(res_state statp,
 		if (evCmpTime(finish, now) <= 0) {
 		poll_err_out:
 			Perror(statp, stderr, "poll", errno);
-			ucresolv_info ("send_dg rtn 2 recompute_resend\n");
+			ucresolv_debug ("UCLIBC send_dg rtn 2 recompute_resend\n");
 			return close_and_return_error (statp, resplen2);
 		}
 		evSubTime(&timeout, &finish, &now);
@@ -1168,14 +1168,14 @@ send_dg(res_state statp,
 		      }
 
 		    *resplen2 = 1;
-				ucresolv_info ("send_dg rtn 3 return resplen\n");
+				ucresolv_debug ("UCLIBC send_dg rtn 3 return resplen\n");
 		    return resplen;
 		  }
 
 		*gotsomewhere = 1;
 		if (resplen2 != NULL)
 		  *resplen2 = 0;
-    ucresolv_info ("send_dg rtn 4 return 0\n");
+    ucresolv_debug ("UCLIBC send_dg rtn 4 return 0\n");
 		return 0;
 	}
 	if (n < 0) {
@@ -1244,7 +1244,7 @@ send_dg(res_state statp,
 
 		      fail_sendmmsg:
 			Perror(statp, stderr, "sendmmsg", errno);
-			ucresolv_info ("send_dg rtn 5 close and rtn error\n");
+			ucresolv_debug ("UCLIBC send_dg rtn 5 close and rtn error\n");
 			return close_and_return_error (statp, resplen2);
 		      }
 		  }
@@ -1254,19 +1254,19 @@ send_dg(res_state statp,
 #ifndef __ASSUME_SENDMMSG
 		  try_send:
 #endif
-				ucresolv_info("send...");
+				ucresolv_debug("send...");
 		    if (nwritten != 0)
 		      sr = send (pfd[0].fd, buf2, buflen2, MSG_NOSIGNAL);
 		    else
 		      sr = send (pfd[0].fd, buf, buflen, MSG_NOSIGNAL);
-        ucresolv_info("done\n");
-        ucresolv_info("sr : %d\n", (int)sr);
+        ucresolv_debug("done\n");
+        ucresolv_debug("sr : %d\n", (int)sr);
 		    if (sr != (nwritten != 0 ? buflen2 : buflen)) {
 				ucresolv_info("ERROR on send\n");
 		      if (errno == EINTR || errno == EAGAIN)
 			goto recompute_resend;
 		      Perror(statp, stderr, "send", errno);
-					ucresolv_info ("send_dg rtn 6 close and rtn error\n");
+					ucresolv_debug ("send_dg rtn 6 close and rtn error\n");
 		      return close_and_return_error (statp, resplen2);
 		    }
 		  just_one:
@@ -1336,7 +1336,7 @@ send_dg(res_state statp,
 		HEADER *anhp = (HEADER *) *thisansp;
 		socklen_t fromlen = sizeof(struct sockaddr_in6);
 		assert (sizeof(from) <= fromlen);
-		ucresolv_info("recvfrom..");
+		ucresolv_debug("recvfrom..");
 		*thisresplenp = recvfrom(pfd[0].fd, (char*)*thisansp,
 					 *thisanssizp, 0,
 					(struct sockaddr *)&from, &fromlen);
@@ -1346,21 +1346,21 @@ send_dg(res_state statp,
 				goto wait;
 			}
 			Perror(statp, stderr, "recvfrom", errno);
-			ucresolv_info ("send_dg rtn 7 close and rtn error\n");
+			ucresolv_debug ("send_dg rtn 7 close and rtn error\n");
 			return close_and_return_error (statp, resplen2);
 		}
-		ucresolv_info("..done\n");
+		ucresolv_debug("..done\n");
 		*gotsomewhere = 1;
 		if (__glibc_unlikely (*thisresplenp < HFIXEDSZ))       {
 			/*
 			 * Undersized message.
 			 */
-			ucresolv_info("..Undersized\n");
+			ucresolv_debug("..Undersized\n");
 			Dprint(statp->options & RES_DEBUG,
 			       (stdout, ";; undersized: %d\n",
 				*thisresplenp));
 			*terrno = EMSGSIZE;
-		  ucresolv_info ("send_dg rtn 8 Undersized\n");
+		  ucresolv_debug ("send_dg rtn 8 Undersized\n");
 			return close_and_return_error (statp, resplen2);
 		}
 		if ((recvresp1 || hp->id != anhp->id)
@@ -1386,7 +1386,7 @@ send_dg(res_state statp,
 			 * XXX - potential security hazard could
 			 *	 be detected here.
 			 */
-			 ucresolv_info("..wrong server\n");
+			 ucresolv_debug("..wrong server\n");
 			DprintQ((statp->options & RES_DEBUG) ||
 				(statp->pfcode & RES_PRF_REPLY),
 				(stdout, ";; not our server:\n"),
@@ -1409,7 +1409,7 @@ send_dg(res_state statp,
 			 * XXX - potential security hazard could
 			 *	 be detected here.
 			 */
-			 ucresolv_info("..wrong query\n");
+			 ucresolv_debug("..wrong query\n");
 			DprintQ((statp->options & RES_DEBUG) ||
 				(statp->pfcode & RES_PRF_REPLY),
 				(stdout, ";; wrong query name:\n"),
@@ -1421,7 +1421,7 @@ send_dg(res_state statp,
 		if (anhp->rcode == SERVFAIL ||
 		    anhp->rcode == NOTIMP ||
 		    anhp->rcode == REFUSED) {
-				ucresolv_info("..server rejected\n");
+				ucresolv_debug("..server rejected\n");
 			DprintQ(statp->options & RES_DEBUG,
 				(stdout, "server rejected query:\n"),
 				*thisansp,
@@ -1431,12 +1431,12 @@ send_dg(res_state statp,
 		next_ns:
 			if (recvresp1 || (buf2 != NULL && recvresp2)) {
 			  *resplen2 = 0;
-				ucresolv_info ("send_dg rtn 9 next_ns\n");
+				ucresolv_debug ("send_dg rtn 9 next_ns\n");
 			  return resplen;
 			}
 			if (buf2 != NULL)
 			  {
-				  ucresolv_info("..no data first query\n");
+				  ucresolv_debug("..no data first query\n");
 			    /* No data from the first reply.  */
 			    resplen = 0;
 			    /* We are waiting for a possible second reply.  */
@@ -1456,7 +1456,7 @@ send_dg(res_state statp,
 		}
 		if (anhp->rcode == NOERROR && anhp->ancount == 0
 		    && anhp->aa == 0 && anhp->ra == 0 && anhp->arcount == 0) {
-				ucresolv_info("..referred query\n");
+				ucresolv_debug("..referred query\n");
 			DprintQ(statp->options & RES_DEBUG,
 				(stdout, "referred query:\n"),
 				*thisansp,
@@ -1479,7 +1479,7 @@ send_dg(res_state statp,
 			// XXX use it and not repeat it over TCP...
 			if (resplen2 != NULL)
 			  *resplen2 = 0;
-			ucresolv_info ("send_dg rtn 10 after res_Nclose\n");
+			ucresolv_debug ("send_dg rtn 10 after res_Nclose\n");
 			return (1);
 		}
 		/* Mark which reply we received.  */
@@ -1499,7 +1499,7 @@ send_dg(res_state statp,
 					  {
 					    if (resplen2 != NULL)
 					      *resplen2 = 0;
-							ucresolv_info ("send_dg rtn 11 after res_Nclose and reopen\n");
+							ucresolv_debug ("send_dg rtn 11 after res_Nclose and reopen\n");
 					    return retval;
 					  }
 					pfd[0].fd = EXT(statp).nssocks[ns];
