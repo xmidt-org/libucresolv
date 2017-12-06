@@ -13,14 +13,13 @@
 #   limitations under the License.
 set(PROJ_RESOLV_LIB ucresolv)
 
-file(GLOB HEADERS ucresolv.h)
+file(GLOB HEADERS ucresolv.h ucresolv_log.h)
 set(SOURCES res_init.c res_query.c res_mkquery.c res_send.c
-  inet_pton.c inet6_scopeid_pton.c
-  inet_addr.c inet_mkadr.c if_index.c mempcpy.c
+  inet_pton.c inet6_scopeid_pton.c inet_addr.c inet_mkadr.c
+  if_index.c mempcpy.c
   ../include/glibc-stdlib/strtoull_l.c
   ../include/glibc-stdlib/strtol_l.c
   ../include/glibc-stdlib/grouping.c
-  ../include/resolv/ns_name.c
   ../include/locale/xlocale.c
   ../include/locale/C-address.c
   ../include/locale/C-collate.c
@@ -44,4 +43,4 @@ set_target_properties(${PROJ_RESOLV_LIB}.shared PROPERTIES OUTPUT_NAME ${PROJ_RE
 
 install (TARGETS ${PROJ_RESOLV_LIB} DESTINATION lib${LIB_SUFFIX})
 install (TARGETS ${PROJ_RESOLV_LIB}.shared DESTINATION lib${LIB_SUFFIX})
-install (FILES ucresolv.h DESTINATION include/${PROJ_RESOLV_LIB})
+install (FILES ucresolv.h ucresolv_log.h DESTINATION include/${PROJ_RESOLV_LIB})

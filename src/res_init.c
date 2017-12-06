@@ -85,6 +85,7 @@
 #include <netinet/in.h>
 #include <ucresolv.h>
 #include <ucresolv-internal.h>
+#include <ucresolv_log.h>
 #include <sys/param.h>
 #include <sys/socket.h>
 #include <sys/time.h>
@@ -115,9 +116,18 @@ static u_int32_t net_mask (struct in_addr); // __THROW;
 
 unsigned long long int __res_initstamp; // attribute_hidden;
 
+logger_func_t logger_func = NULL;
+
+
 /*
- * Resolver state default settings.
- */
+ * Register logger function
+*/ 
+void register_ucresolv_logger (logger_func_t logger_func_p)
+{
+  logger_func = logger_func_p;
+}
+
+
 
 /*
  * Set up default settings.  If the configuration file exist, the values
@@ -127,12 +137,13 @@ unsigned long long int __res_initstamp; // attribute_hidden;
  * Return 0 if completes successfully, -1 on error
  */
 int
-res_Ninit(res_state statp) {
+__res_ninit(res_state statp) {
 	extern int __res_vinit(res_state, int);
 
+	ucresolv_info ("UCLIBC res_ninit\n");
 	return (__res_vinit(statp, 0));
 }
-libc_hidden_def (__res_Ninit)
+libc_hidden_def (__res_ninit)
 
 /* This function has to be reachable by res_data.c but not publically. */
 int
@@ -407,7 +418,7 @@ res_setoptions(res_state statp, const char *options, const char *source) {
 
 #ifdef DEBUG
 	if (statp->options & RES_DEBUG)
-		printf(";; res_setoptions(\"%s\", \"%s\")...\n",
+		ucresolv_debug("UCLIBC res_setoptions(\"%s\", \"%s\")...\n",
 		       options, source);
 #endif
 	while (*cp) {
@@ -423,7 +434,7 @@ res_setoptions(res_state statp, const char *options, const char *source) {
 				statp->ndots = RES_MAXNDOTS;
 #ifdef DEBUG
 			if (statp->options & RES_DEBUG)
-				printf(";;\tndots=%d\n", statp->ndots);
+				ucresolv_debug("UCLIBC\tndots=%d\n", statp->ndots);
 #endif
 		} else if (!strncmp(cp, "timeout:", sizeof("timeout:") - 1)) {
 			i = atoi(cp + sizeof("timeout:") - 1);
@@ -440,11 +451,11 @@ res_setoptions(res_state statp, const char *options, const char *source) {
 		} else if (!strncmp(cp, "debug", sizeof("debug") - 1)) {
 #ifdef DEBUG
 			if (!(statp->options & RES_DEBUG)) {
-				printf(";; res_setoptions(\"%s\", \"%s\")..\n",
+				ucresolv_debug("UCLIBC res_setoptions(\"%s\", \"%s\")..\n",
 				       options, source);
 				statp->options |= RES_DEBUG;
 			}
-			printf(";;\tdebug\n");
+			ucresolv_debug("UCLIBC\tdebug\n");
 #endif
 		} else {
 		  static const struct
@@ -537,11 +548,12 @@ __res_iclose(res_state statp, bool free_addr) {
 libc_hidden_def (__res_iclose)
 
 void
-res_Nclose(res_state statp)
+__res_nclose(res_state statp)
 {
+	ucresolv_info ("UCLIBC res_nclose\n");
   __res_iclose (statp, true);
 }
-libc_hidden_def (__res_Nclose)
+libc_hidden_def (__res_nclose)
 
 /* This is called when a thread is exiting to free resources held in _res.  */
 static void __attribute__ ((section ("__libc_thread_freeres_fn")))

@@ -77,6 +77,7 @@
 #include <netdb.h>
 #include "ucresolv.h"
 #include "ucresolv-internal.h"
+#include "ucresolv_log.h"
 #include <glibc-stdio.h>
 #include <glibc-stdlib/stdlib.h>
 #include <glibc-string.h>
@@ -108,7 +109,8 @@ __libc_res_nsend(res_state statp, const u_char *buf, int buflen,
 #ifndef __glibc_unlikely 
 #define __glibc_unlikely 
 #endif
-#define __show_errno(err) printf("error : %d,func : %s:%d\n",err,__FUNCTION__,__LINE__)
+#define __show_errno(err) ucresolv_info("error : %d,func : %s:%d\n",err,__FUNCTION__,__LINE__)
+
 static int
 __libc_res_Nquerydomain(res_state statp, const char *name, const char *domain,
 			int class, int type, u_char *answer, int anslen,
@@ -140,7 +142,7 @@ __libc_res_Nquery(res_state statp,
 	HEADER *hp = (HEADER *) answer;
 	HEADER *hp2;
 	int n, use_malloc = 0;
-printf("\nres_Nquery...\n");
+  ucresolv_info("UCLIBC __libc_res_Nquery...\n");
 	size_t bufsize = (type == T_QUERY_A_AND_AAAA ? 2 : 1) * QUERYSIZE;
 	u_char *buf = alloca (bufsize);
 	u_char *query1 = buf;
@@ -153,7 +155,7 @@ printf("\nres_Nquery...\n");
 
 #ifdef DEBUG
 	if (statp->options & RES_DEBUG)
-		printf(";; res_query(%s, %d, %d)\n", name, class, type);
+		ucresolv_debug("UCLIBC res_query(%s, %d, %d)\n", name, class, type);
 #endif
 
 	if (type == T_QUERY_A_AND_AAAA)
@@ -198,7 +200,7 @@ printf("\nres_Nquery...\n");
 	  }
 	else
 	  {
-printf("res_nmkquery...\n");
+		ucresolv_info("res_nmkquery...\n");
 	    n = res_nmkquery(statp, QUERY, name, class, type, NULL, 0, NULL,
 			     query1, bufsize);
 
@@ -232,7 +234,7 @@ printf("res_nmkquery...\n");
 	if (__glibc_unlikely (n <= 0))       {
 #ifdef DEBUG
 		if (statp->options & RES_DEBUG)
-			printf(";; res_query: mkquery failed\n");
+			ucresolv_debug("UCLIBC res_query: mkquery failed\n");
 #endif
 		RES_SET_H_ERRNO(statp, NO_RECOVERY);
 		if (use_malloc)
@@ -240,7 +242,7 @@ printf("res_nmkquery...\n");
 		return (n);
 	}
 	assert (answerp == NULL || (void *) *answerp == (void *) answer);
-printf("Count = %d\n",statp->nscount);
+  ucresolv_debug("UCLIBC Count = %d\n",statp->nscount);
 	n = __libc_res_nsend(statp, query1, nquery1, query2, nquery2, answer,
 			     anslen, answerp, answerp2, nanswerp2, resplen2,
 			     answerp2_malloced);
@@ -249,7 +251,7 @@ printf("Count = %d\n",statp->nscount);
 	if (n < 0) {
 #ifdef DEBUG
 		if (statp->options & RES_DEBUG)
-			printf(";; res_query: send error\n");
+			ucresolv_debug("UCLIBC res_query: send error\n");
 #endif
 		RES_SET_H_ERRNO(statp, TRY_AGAIN);
 		return (n);
@@ -282,10 +284,10 @@ printf("Count = %d\n",statp->nscount);
 	    && (hp2->rcode != NOERROR || ntohs(hp2->ancount) == 0)) {
 #ifdef DEBUG
 		if (statp->options & RES_DEBUG) {
-			printf(";; rcode = %d, ancount=%d\n", hp->rcode,
+			ucresolv_debug("UCLIBC rcode = %d, ancount=%d\n", hp->rcode,
 			    ntohs(hp->ancount));
 			if (hp != hp2)
-			  printf(";; rcode2 = %d, ancount2=%d\n", hp2->rcode,
+			  ucresolv_debug("UCLIBC rcode2 = %d, ancount2=%d\n", hp2->rcode,
 				 ntohs(hp2->ancount));
 		}
 #endif
@@ -328,16 +330,17 @@ printf("Count = %d\n",statp->nscount);
 libresolv_hidden_def (__libc_res_Nquery)
 
 int
-res_Nquery(res_state statp,
+__res_nquery(res_state statp,
 	   const char *name,	/* domain name */
 	   int class, int type,	/* class and type of query */
 	   u_char *answer,	/* buffer to put answer */
 	   int anslen)		/* size of answer buffer */
 {
+	ucresolv_info ("UCLIBC res_nquery\n");
 	return __libc_res_Nquery(statp, name, class, type, answer, anslen,
 				 NULL, NULL, NULL, NULL, NULL);
 }
-//libresolv_hidden_def (res_Nquery)
+libresolv_hidden_def (__res_nquery)
 
 /*
  * Formulate a normal query, send, and retrieve answer in supplied buffer.
@@ -384,7 +387,7 @@ __libc_res_Nsearch(res_state statp,
 
 #ifdef DEBUG
 	if (statp->options & RES_DEBUG)
-		printf("dots=%d, statp->ndots=%d, trailing_dot=%d, name=%s\n",
+		ucresolv_debug("UCLIBC dots=%d, statp->ndots=%d, trailing_dot=%d, name=%s\n",
 		       (int)dots,(int)statp->ndots,(int)trailing_dot,name);
 #endif
 
@@ -554,16 +557,17 @@ __libc_res_Nsearch(res_state statp,
 libresolv_hidden_def (__libc_res_Nsearch)
 
 int
-res_Nsearch(res_state statp,
+__res_nsearch(res_state statp,
 	    const char *name,	/* domain name */
 	    int class, int type,	/* class and type of query */
 	    u_char *answer,	/* buffer to put answer */
 	    int anslen)		/* size of answer */
 {
+	ucresolv_info ("UCLIBC res_nsearch\n");
 	return __libc_res_Nsearch(statp, name, class, type, answer,
 				  anslen, NULL, NULL, NULL, NULL, NULL);
 }
-libresolv_hidden_def (res_Nsearch)
+libresolv_hidden_def (__res_nsearch)
 
 /*
  * Perform a call on res_query on the concatenation of name and domain.
@@ -587,7 +591,7 @@ __libc_res_Nquerydomain(res_state statp,
 
 #ifdef DEBUG
 	if (statp->options & RES_DEBUG)
-		printf(";; res_Nquerydomain(%s, %s, %d, %d)\n",
+		ucresolv_debug("UCLIBC res_Nquerydomain(%s, %s, %d, %d)\n",
 		       name, domain?domain:"<Nil>", class, type);
 #endif
 	if (domain == NULL) {
@@ -617,18 +621,19 @@ __libc_res_Nquerydomain(res_state statp,
 }
 
 int
-res_Nquerydomain(res_state statp,
+__res_nquerydomain(res_state statp,
 	    const char *name,
 	    const char *domain,
 	    int class, int type,	/* class and type of query */
 	    u_char *answer,		/* buffer to put answer */
 	    int anslen)		/* size of answer */
 {
+	ucresolv_info ("UCLIBC res_nquesrydomain\n");
 	return __libc_res_Nquerydomain(statp, name, domain, class, type,
 				       answer, anslen, NULL, NULL, NULL, NULL,
 				       NULL);
 }
-libresolv_hidden_def (res_Nquerydomain)
+libresolv_hidden_def (__res_nquerydomain)
 
 const char *
 res_hostalias(const res_state statp, const char *name, char *dst, size_t siz) {

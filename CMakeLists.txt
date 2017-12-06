@@ -46,9 +46,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wall")
 #-------------------------------------------------------------------------------
 find_package (Threads)
 
-if (NOT BUILD_YOCTO)
+if (BUILD_YOCTO)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_BUILD_NON_YOCTO")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DBUILD_YOCTO")
 
 endif ()
 

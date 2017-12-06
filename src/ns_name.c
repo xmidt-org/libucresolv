@@ -16,17 +16,14 @@
  */
 
 #include <sys/types.h>
-
-#include <netinet/in.h>
+#define __OPTIMIZE__ 1
+#include <libc-symbols.h>
 #include <arpa/nameser.h>
 
-#include <errno.h>
-#include <resolv.h>
-#include <string.h>
-#include <ctype.h>
-#include <stdlib.h>
-#include <limits.h>
+#include <glibc-errno.h>
+#include <glibc-string.h>
 
+# define EMSGSIZE 90
 # define SPRINTF(x) ((size_t)sprintf x)
 
 /* Data. */
@@ -55,7 +52,7 @@ static int		labellen(const u_char *);
  *\li	All other domains are returned in non absolute form
  */
 int
-ns_name_ntop(const u_char *src, char *dst, size_t dstsiz)
+__ns_name_ntop(const u_char *src, char *dst, size_t dstsiz)
 {
 	const u_char *cp;
 	char *dn, *eom;
@@ -129,8 +126,8 @@ ns_name_ntop(const u_char *src, char *dst, size_t dstsiz)
 	*dn++ = '\0';
 	return (dn - dst);
 }
-libresolv_hidden_def (ns_name_ntop)
-strong_alias (ns_name_ntop, __ns_name_ntop)
+libresolv_hidden_def (__ns_name_ntop)
+
 
 /*%
  *	Convert an ascii string into an encoded domain name as per RFC1035.
@@ -146,7 +143,7 @@ strong_alias (ns_name_ntop, __ns_name_ntop)
  */
 
 int
-ns_name_pton(const char *src, u_char *dst, size_t dstsiz)
+__ns_name_pton(const char *src, u_char *dst, size_t dstsiz)
 {
 	u_char *label, *bp, *eom;
 	int c, n, escaped;
@@ -245,61 +242,8 @@ ns_name_pton(const char *src, u_char *dst, size_t dstsiz)
 	}
 	return (0);
 }
-libresolv_hidden_def (ns_name_pton)
+libresolv_hidden_def (__ns_name_pton)
 
-/*%
- *	Convert a network strings labels into all lowercase.
- *
- * return:
- *\li	Number of bytes written to buffer, or -1 (with errno set)
- *
- * notes:
- *\li	Enforces label and domain length limits.
- */
-
-int
-ns_name_ntol(const u_char *src, u_char *dst, size_t dstsiz)
-{
-	const u_char *cp;
-	u_char *dn, *eom;
-	u_char c;
-	u_int n;
-	int l;
-
-	cp = src;
-	dn = dst;
-	eom = dst + dstsiz;
-
-	if (dn >= eom) {
-		__set_errno (EMSGSIZE);
-		return (-1);
-	}
-	while ((n = *cp++) != 0) {
-		if ((n & NS_CMPRSFLGS) == NS_CMPRSFLGS) {
-			/* Some kind of compression pointer. */
-			__set_errno (EMSGSIZE);
-			return (-1);
-		}
-		*dn++ = n;
-		if ((l = labellen(cp - 1)) < 0) {
-			__set_errno (EMSGSIZE);
-			return (-1);
-		}
-		if (dn + l >= eom) {
-			__set_errno (EMSGSIZE);
-			return (-1);
-		}
-		for ((void)NULL; l > 0; l--) {
-			c = *cp++;
-			if (isupper(c))
-				*dn++ = tolower(c);
-			else
-				*dn++ = c;
-		}
-	}
-	*dn++ = '\0';
-	return (dn - dst);
-}
 
 /*%
  *	Unpack a domain name from a message, source may be compressed.
@@ -308,7 +252,7 @@ ns_name_ntol(const u_char *src, u_char *dst, size_t dstsiz)
  *\li	-1 if it fails, or consumed octets if it succeeds.
  */
 int
-ns_name_unpack(const u_char *msg, const u_char *eom, const u_char *src,
+__ns_name_unpack(const u_char *msg, const u_char *eom, const u_char *src,
 	       u_char *dst, size_t dstsiz)
 {
 	const u_char *srcp, *dstlim;
@@ -379,8 +323,8 @@ ns_name_unpack(const u_char *msg, const u_char *eom, const u_char *src,
 		len = srcp - src;
 	return (len);
 }
-libresolv_hidden_def (ns_name_unpack)
-strong_alias (ns_name_unpack, __ns_name_unpack)
+libresolv_hidden_def (__ns_name_unpack)
+
 
 /*%
  *	Pack domain name 'domain' into 'comp_dn'.
@@ -402,7 +346,7 @@ strong_alias (ns_name_unpack, __ns_name_unpack)
  *	list.
  */
 int
-ns_name_pack(const u_char *src, u_char *dst, int dstsiz,
+__ns_name_pack(const u_char *src, u_char *dst, int dstsiz,
 	     const u_char **dnptrs, const u_char **lastdnptr)
 {
 	u_char *dstp;
@@ -492,7 +436,8 @@ cleanup:
 	}
 	return (dstp - dst);
 }
-libresolv_hidden_def (ns_name_pack)
+libresolv_hidden_def (__ns_name_pack)
+
 
 /*%
  *	Expand compressed domain name to presentation format.
@@ -504,19 +449,20 @@ libresolv_hidden_def (ns_name_pack)
  *\li	Root domain returns as "." not "".
  */
 int
-ns_name_uncompress(const u_char *msg, const u_char *eom, const u_char *src,
+__ns_name_uncompress(const u_char *msg, const u_char *eom, const u_char *src,
 		   char *dst, size_t dstsiz)
 {
 	u_char tmp[NS_MAXCDNAME];
 	int n;
 
-	if ((n = ns_name_unpack(msg, eom, src, tmp, sizeof tmp)) == -1)
+	if ((n = __ns_name_unpack(msg, eom, src, tmp, sizeof tmp)) == -1)
 		return (-1);
-	if (ns_name_ntop(tmp, dst, dstsiz) == -1)
+	if (__ns_name_ntop(tmp, dst, dstsiz) == -1)
 		return (-1);
 	return (n);
 }
-libresolv_hidden_def (ns_name_uncompress)
+libresolv_hidden_def (__ns_name_uncompress)
+
 
 /*%
  *	Compress a domain name into wire format, using compression pointers.
@@ -534,33 +480,17 @@ libresolv_hidden_def (ns_name_uncompress)
  *	is NULL, we don't update the list.
  */
 int
-ns_name_compress(const char *src, u_char *dst, size_t dstsiz,
+__ns_name_compress(const char *src, u_char *dst, size_t dstsiz,
 		 const u_char **dnptrs, const u_char **lastdnptr)
 {
 	u_char tmp[NS_MAXCDNAME];
 
-	if (ns_name_pton(src, tmp, sizeof tmp) == -1)
+	if (__ns_name_pton(src, tmp, sizeof tmp) == -1)
 		return (-1);
-	return (ns_name_pack(tmp, dst, dstsiz, dnptrs, lastdnptr));
+	return (__ns_name_pack(tmp, dst, dstsiz, dnptrs, lastdnptr));
 }
-libresolv_hidden_def (ns_name_compress)
+libresolv_hidden_def (__ns_name_compress)
 
-/*%
- * Reset dnptrs so that there are no active references to pointers at or
- * after src.
- */
-void
-ns_name_rollback(const u_char *src, const u_char **dnptrs,
-		 const u_char **lastdnptr)
-{
-	while (dnptrs < lastdnptr && *dnptrs != NULL) {
-		if (*dnptrs >= src) {
-			*dnptrs = NULL;
-			break;
-		}
-		dnptrs++;
-	}
-}
 
 /*%
  *	Advance *ptrptr to skip over the compressed name it points at.
@@ -569,7 +499,7 @@ ns_name_rollback(const u_char *src, const u_char **dnptrs,
  *\li	0 on success, -1 (with errno set) on failure.
  */
 int
-ns_name_skip(const u_char **ptrptr, const u_char *eom)
+__ns_name_skip(const u_char **ptrptr, const u_char *eom)
 {
 	const u_char *cp;
 	u_int n;
@@ -597,7 +527,8 @@ ns_name_skip(const u_char **ptrptr, const u_char *eom)
 	*ptrptr = cp;
 	return (0);
 }
-libresolv_hidden_def (ns_name_skip)
+libresolv_hidden_def (__ns_name_skip)
+
 
 /* Private. */
 
