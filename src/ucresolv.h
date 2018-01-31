@@ -259,7 +259,7 @@ int		res_send (const unsigned char *, int, unsigned char *, int)
      __THROW;
 __END_DECLS
 
-#ifdef BUILD_YOCTO
+#ifdef __UCLIBC__
 #define ns_initparse __ns_initparse
 #define ns_parserr   __ns_parserr
 #define ns_name_compress __ns_name_compress
