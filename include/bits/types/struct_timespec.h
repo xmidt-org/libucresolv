@@ -3,10 +3,12 @@
 
 #include <bits/types.h>
 
+#ifdef __UCLIBC__
 #if __WORDSIZE == 32
 __extension__ typedef long long int __syscall_slong_t;
 #else
 typedef long int __syscall_slong_t;
+#endif
 #endif
 
 /* POSIX.1b structure for a time value.  This is like a `struct timeval' but
