@@ -1194,67 +1194,21 @@ send_dg(res_state statp,
 		if (have_sendmmsg >= 0 && nwritten == 0 && buf2 != NULL
 		    && !single_request)
 		  {
-		    struct iovec iov[2];
-		    struct mmsghdr reqs[2];
-		    reqs[0].msg_hdr.msg_name = NULL;
-		    reqs[0].msg_hdr.msg_namelen = 0;
-		    reqs[0].msg_hdr.msg_iov = &iov[0];
-		    reqs[0].msg_hdr.msg_iovlen = 1;
-		    iov[0].iov_base = (void *) buf;
-		    iov[0].iov_len = buflen;
-		    reqs[0].msg_hdr.msg_control = NULL;
-		    reqs[0].msg_hdr.msg_controllen = 0;
-
-		    reqs[1].msg_hdr.msg_name = NULL;
-		    reqs[1].msg_hdr.msg_namelen = 0;
-		    reqs[1].msg_hdr.msg_iov = &iov[1];
-		    reqs[1].msg_hdr.msg_iovlen = 1;
-		    iov[1].iov_base = (void *) buf2;
-		    iov[1].iov_len = buflen2;
-		    reqs[1].msg_hdr.msg_control = NULL;
-		    reqs[1].msg_hdr.msg_controllen = 0;
-
-		    int ndg = 0;//__sendmmsg (pfd[0].fd, reqs, 2, MSG_NOSIGNAL);
-		    if (__glibc_likely (ndg == 2))
-		      {
-			if (reqs[0].msg_len != buflen
-			    || reqs[1].msg_len != buflen2)
-			  goto fail_sendmmsg;
-
-			pfd[0].events = POLLIN;
-			nwritten += 2;
-		      }
-		    else if (ndg == 1 && reqs[0].msg_len == buflen)
-		      goto just_one;
-		    else if (ndg < 0 && (errno == EINTR || errno == EAGAIN))
-		      goto recompute_resend;
-		    else
-		      {
 #ifndef __ASSUME_SENDMMSG
 			if (__glibc_unlikely (have_sendmmsg == 0))
 			  {
-			    if (ndg < 0 && errno == ENOSYS)
-			      {
-				have_sendmmsg = -1;
-				goto try_send;
-			      }
 			    have_sendmmsg = 1;
 			  }
 #endif
 
-		      fail_sendmmsg:
 			Perror(statp, stderr, "sendmmsg", errno);
 			ucresolv_debug ("UCLIBC send_dg rtn 5 close and rtn error\n");
 			return close_and_return_error (statp, resplen2);
-		      }
 		  }
 		else
 		  {
 		    ssize_t sr;
-#ifndef __ASSUME_SENDMMSG
-		  try_send:
-#endif
-				ucresolv_debug("send...");
+		    ucresolv_debug("send...");
 		    if (nwritten != 0)
 		      sr = send (pfd[0].fd, buf2, buflen2, MSG_NOSIGNAL);
 		    else
@@ -1269,7 +1223,7 @@ send_dg(res_state statp,
 					ucresolv_debug ("send_dg rtn 6 close and rtn error\n");
 		      return close_and_return_error (statp, resplen2);
 		    }
-		  just_one:
+		  
 		    if (nwritten != 0 || buf2 == NULL || single_request)
 		      pfd[0].events = POLLIN;
 		    else
