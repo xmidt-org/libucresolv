@@ -109,7 +109,7 @@ __libc_res_nsend(res_state statp, const u_char *buf, int buflen,
 #ifndef __glibc_unlikely 
 #define __glibc_unlikely 
 #endif
-#define __show_errno(err) ucresolv_info("error : %d,func : %s:%d\n",err,__FUNCTION__,__LINE__)
+#define __show_errno(err) ucresolv_error("error : %d,func : %s:%d\n",err,__FUNCTION__,__LINE__)
 
 static int
 __libc_res_Nquerydomain(res_state statp, const char *name, const char *domain,
@@ -142,7 +142,7 @@ __libc_res_Nquery(res_state statp,
 	HEADER *hp = (HEADER *) answer;
 	HEADER *hp2;
 	int n, use_malloc = 0;
-  ucresolv_info("UCLIBC __libc_res_Nquery...\n");
+  ucresolv_debug("UCLIBC __libc_res_Nquery...\n");
 	size_t bufsize = (type == T_QUERY_A_AND_AAAA ? 2 : 1) * QUERYSIZE;
 	u_char *buf = alloca (bufsize);
 	u_char *query1 = buf;
@@ -200,7 +200,7 @@ __libc_res_Nquery(res_state statp,
 	  }
 	else
 	  {
-		ucresolv_info("res_nmkquery...\n");
+		ucresolv_debug("res_nmkquery...\n");
 	    n = res_nmkquery(statp, QUERY, name, class, type, NULL, 0, NULL,
 			     query1, bufsize);
 
@@ -336,7 +336,7 @@ __res_nquery(res_state statp,
 	   u_char *answer,	/* buffer to put answer */
 	   int anslen)		/* size of answer buffer */
 {
-	ucresolv_info ("UCLIBC res_nquery\n");
+	ucresolv_debug ("UCLIBC res_nquery\n");
 	return __libc_res_Nquery(statp, name, class, type, answer, anslen,
 				 NULL, NULL, NULL, NULL, NULL);
 }
@@ -563,7 +563,7 @@ __res_nsearch(res_state statp,
 	    u_char *answer,	/* buffer to put answer */
 	    int anslen)		/* size of answer */
 {
-	ucresolv_info ("UCLIBC res_nsearch\n");
+	ucresolv_debug ("UCLIBC res_nsearch\n");
 	return __libc_res_Nsearch(statp, name, class, type, answer,
 				  anslen, NULL, NULL, NULL, NULL, NULL);
 }
@@ -628,7 +628,7 @@ __res_nquerydomain(res_state statp,
 	    u_char *answer,		/* buffer to put answer */
 	    int anslen)		/* size of answer */
 {
-	ucresolv_info ("UCLIBC res_nquesrydomain\n");
+	ucresolv_debug ("UCLIBC res_nquesrydomain\n");
 	return __libc_res_Nquerydomain(statp, name, domain, class, type,
 				       answer, anslen, NULL, NULL, NULL, NULL,
 				       NULL);
