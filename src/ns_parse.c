@@ -52,7 +52,7 @@ static int
 dn_skipname(const u_char *ptr, const u_char *eom) {
 	const u_char *saveptr = ptr;
 
-	ucresolv_info ("UCLIBC dn_skipname\n");
+	ucresolv_debug ("UCLIBC dn_skipname\n");
 	if (NS_name_skip(&ptr, eom) == -1)
 		return (-1);
 	return (ptr - saveptr);
@@ -81,7 +81,7 @@ int
 NS_skiprr(const u_char *ptr, const u_char *eom, ns_sect section, int count) {
 	const u_char *optr = ptr;
 
-	ucresolv_info ("UCLIBC ns_skiprr %d\n", count);
+	ucresolv_debug ("UCLIBC ns_skiprr %d\n", count);
 	for ((void)NULL; count > 0; count--) {
 		int b, rdlength;
 
@@ -258,7 +258,7 @@ libresolv_hidden_def (NS_parserr)
 
 static void
 setsection(ns_msg *msg, ns_sect sect) {
-  ucresolv_info ("setsection\n");
+  ucresolv_debug ("setsection\n");
 	msg->_sect = sect;
 	if (sect == ns_s_max) {
 		msg->_rrnum = -1;

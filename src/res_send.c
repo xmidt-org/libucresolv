@@ -120,7 +120,7 @@
 #endif
 
 #define libresolv_hidden_def(name)
-#define __show_errno(err) ucresolv_info("error : %d,func : %s:%d\n",err,__FUNCTION__,__LINE__)
+#define __show_errno(err) ucresolv_error("error : %d,func : %s:%d\n",err,__FUNCTION__,__LINE__)
 
 #ifndef __glibc_likely
 #define __glibc_likely
@@ -258,7 +258,7 @@ int
 res_ourserver_p(const res_state statp, const struct sockaddr_in6 *inp)
 {
 	int ns;
-  ucresolv_info("UCLIBC res_ourserver_p\n");
+  ucresolv_debug("UCLIBC res_ourserver_p\n");
 
 	if (inp->sin6_family == AF_INET) {
 	    struct sockaddr_in *in4p = (struct sockaddr_in *) inp;
@@ -309,7 +309,7 @@ res_nameinquery(const char *name, int type, int class,
 {
 	const u_char *cp = buf + HFIXEDSZ;
 	int qdcount = ntohs(((HEADER*)buf)->qdcount);
-  ucresolv_info("UCLIBC res_nameinquery\n");
+  ucresolv_debug("UCLIBC res_nameinquery\n");
 	while (qdcount-- > 0) {
 		char tname[MAXDNAME+1];
 		int n, ttype, tclass;
@@ -347,7 +347,7 @@ int
 res_queriesmatch(const u_char *buf1, const u_char *eom1,
 		 const u_char *buf2, const u_char *eom2)
 {
-	ucresolv_info("UCLIBC res_queriesmatch\n");
+	ucresolv_debug("UCLIBC res_queriesmatch\n");
 	if (buf1 + HFIXEDSZ > eom1 || buf2 + HFIXEDSZ > eom2)
 		return (-1);
 
@@ -399,7 +399,7 @@ __libc_res_nsend(res_state statp, const u_char *buf, int buflen,
 		 int *nansp2, int *resplen2, int *ansp2_malloced)
 {
   int gotsomewhere, terrno, try, v_circuit, resplen, ns, n;
-  ucresolv_info("UCLIBC __libc_res_nsend\n");
+  ucresolv_debug("UCLIBC __libc_res_nsend\n");
 	if (statp->nscount == 0) {
 		__show_errno (ESRCH);
 		return (-1);
@@ -595,7 +595,7 @@ libresolv_hidden_def (res_nsend)
 static struct sockaddr *
 get_nsaddr (res_state statp, int n)
 {
-  ucresolv_info("get_nsaddr\n");
+  ucresolv_debug("get_nsaddr\n");
   if (statp->nsaddr_list[n].sin_family == 0 && EXT(statp).nsaddrs[n] != NULL)
     /* EXT(statp).nsaddrs[n] holds an address that is larger than
        struct sockaddr, and user code did not update
@@ -698,7 +698,7 @@ send_vc(res_state statp,
 	int *terrno, int ns, u_char **anscp, u_char **ansp2, int *anssizp2,
 	int *resplen2, int *ansp2_malloced)
 {
-	ucresolv_info("UCLIBC send_vc\n");
+	ucresolv_debug("UCLIBC send_vc\n");
 	const HEADER *hp = (HEADER *) buf;
 	const HEADER *hp2 = (HEADER *) buf2;
 	HEADER *anhp = (HEADER *) *ansp;
@@ -950,7 +950,7 @@ send_vc(res_state statp,
 static int
 reopen (res_state statp, int *terrno, int ns)
 {
-	ucresolv_info("UCLIBC reopen\n");
+	ucresolv_debug("UCLIBC reopen\n");
 	if (EXT(statp).nssocks[ns] == -1) {
 		struct sockaddr *nsap = get_nsaddr (statp, ns);
 		socklen_t slen;
@@ -1071,7 +1071,7 @@ send_dg(res_state statp,
 	int *terrno, int ns, int *v_circuit, int *gotsomewhere, u_char **anscp,
 	u_char **ansp2, int *anssizp2, int *resplen2, int *ansp2_malloced)
 {
-	ucresolv_info("UCLIBC send_dg\n");
+	ucresolv_debug("UCLIBC send_dg\n");
 	const HEADER *hp = (HEADER *) buf;
 	const HEADER *hp2 = (HEADER *) buf2;
 	struct timespec now, timeout, finish;
@@ -1324,7 +1324,7 @@ send_dg(res_state statp,
 			 * XXX - potential security hazard could
 			 *	 be detected here.
 			 */
-			 ucresolv_info("..Old query\n");
+			 ucresolv_info("Response from old query, ignoring\n");
 			DprintQ((statp->options & RES_DEBUG) ||
 				(statp->pfcode & RES_PRF_REPLY),
 				(stdout, ";; old answer:\n"),
@@ -1340,7 +1340,7 @@ send_dg(res_state statp,
 			 * XXX - potential security hazard could
 			 *	 be detected here.
 			 */
-			 ucresolv_debug("..wrong server\n");
+			 ucresolv_debug("Response from wrong server, ignoring\n");
 			DprintQ((statp->options & RES_DEBUG) ||
 				(statp->pfcode & RES_PRF_REPLY),
 				(stdout, ";; not our server:\n"),
@@ -1363,7 +1363,7 @@ send_dg(res_state statp,
 			 * XXX - potential security hazard could
 			 *	 be detected here.
 			 */
-			 ucresolv_debug("..wrong query\n");
+			 ucresolv_debug("Response contains wrong query, ignoring\n");
 			DprintQ((statp->options & RES_DEBUG) ||
 				(statp->pfcode & RES_PRF_REPLY),
 				(stdout, ";; wrong query name:\n"),
@@ -1423,7 +1423,7 @@ send_dg(res_state statp,
 			 * To get the rest of answer,
 			 * use TCP with same server.
 			 */
-			 ucresolv_info("..truncated\n");
+			 ucresolv_info("Answer is truncated. Using same server to get rest of answer.\n");
 			Dprint(statp->options & RES_DEBUG,
 			       (stdout, ";; truncated answer\n"));
 			*v_circuit = 1;
@@ -1463,15 +1463,15 @@ send_dg(res_state statp,
 		}
 		/* All is well.  We have received both responses (if
 		   two responses were requested).  */
-		ucresolv_info ("send_dg rtn 12 all is well\n");
+		ucresolv_info ("Received both responses (if two responses were requested).\n");
 		return (resplen);
 	} else if (pfd[0].revents & (POLLERR | POLLHUP | POLLNVAL)) {
 	  /* Something went wrong.  We can stop trying.  */
-		ucresolv_info ("send_dg rtn 13 stop trying\n");
+		ucresolv_error ("Something went wrong. Stop trying.\n");
 	  return close_and_return_error (statp, resplen2);
 	} else {
 		/* poll should not have returned > 0 in this case.  */
-		ucresolv_info ("send_dg abort\n");
+		ucresolv_error ("poll should not have returned > 0. Hence aborting\n");
 		abort ();
 	}
 }
@@ -1518,7 +1518,7 @@ Perror(const res_state statp, FILE *file, const char *string, int error) {
 
 static int
 sock_eq(struct sockaddr_in6 *a1, struct sockaddr_in6 *a2) {
-	ucresolv_info("sock_eq\n");
+	ucresolv_debug("sock_eq\n");
 	if (a1->sin6_family == a2->sin6_family) {
 		if (a1->sin6_family == AF_INET)
 			return ((((struct sockaddr_in *)a1)->sin_port ==

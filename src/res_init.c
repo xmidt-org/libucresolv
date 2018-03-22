@@ -140,7 +140,7 @@ int
 __res_ninit(res_state statp) {
 	extern int __res_vinit(res_state, int);
 
-	ucresolv_info ("UCLIBC res_ninit\n");
+	ucresolv_debug ("UCLIBC res_ninit\n");
 	return (__res_vinit(statp, 0));
 }
 libc_hidden_def (__res_ninit)
@@ -550,7 +550,7 @@ libc_hidden_def (__res_iclose)
 void
 __res_nclose(res_state statp)
 {
-	ucresolv_info ("UCLIBC res_nclose\n");
+	ucresolv_debug ("UCLIBC res_nclose\n");
   __res_iclose (statp, true);
 }
 libc_hidden_def (__res_nclose)
