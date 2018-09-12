@@ -578,6 +578,7 @@ __libc_res_nsend(res_state statp, const u_char *buf, int buflen,
 			__show_errno (ETIMEDOUT);	/* no answer obtained */
 	} else
 		__show_errno (terrno);
+
 	return (-1);
 }
 
@@ -1095,6 +1096,8 @@ send_dg(res_state statp,
 	int save_gotsomewhere = *gotsomewhere;
 
 	int retval;
+	ucresolv_info ("send_dg retrans %d, retry %d\n", 
+		statp->retrans, statp->retry);
  retry_reopen:
 	retval = reopen (statp, terrno, ns);
 	if (retval <= 0)
@@ -1423,7 +1426,9 @@ send_dg(res_state statp,
 			 * To get the rest of answer,
 			 * use TCP with same server.
 			 */
-			 ucresolv_info("Answer is truncated. Using same server to get rest of answer.\n");
+			 ucresolv_info("Answer is truncated (%d of %d) HF %d. "
+                            "Using same server to get rest of answer.\n",
+                            *thisresplenp, *thisanssizp, HFIXEDSZ);
 			Dprint(statp->options & RES_DEBUG,
 			       (stdout, ";; truncated answer\n"));
 			*v_circuit = 1;
