@@ -752,6 +752,7 @@ send_vc(res_state statp,
 			Perror(statp, stderr, "socket(vc)", errno);
 			if (resplen2 != NULL)
 			  *resplen2 = 0;
+			ucresolv_info ("send_vc: cannot create socket\n");
 			return (-1);
 		}
 		__show_errno (0);
@@ -761,6 +762,7 @@ send_vc(res_state statp,
 			    : sizeof (struct sockaddr_in6)) < 0) {
 			*terrno = errno;
 			Aerror(statp, stderr, "connect/vc", errno, nsap);
+			ucresolv_info ("send_vc: cannot connect to socket\n");
 			return close_and_return_error (statp, resplen2);
 		}
 		statp->_flags |= RES_F_VC;
@@ -784,6 +786,8 @@ send_vc(res_state statp,
 	if (TEMP_FAILURE_RETRY (writev(statp->_vcsock, iov, niov)) != explen) {
 		*terrno = errno;
 		Perror(statp, stderr, "write failed", errno);
+		ucresolv_info ("send_vc: write failed: %d, %s\n", 
+			errno, strerror (errno));
 		return close_and_return_error (statp, resplen2);
 	}
 	/*
@@ -820,8 +824,11 @@ send_vc(res_state statp,
 		    //__res_iclose(statp, false);
 			res_nclose(statp);
 		    connreset = 1;
+		    ucresolv_info ("send_vc: read len conn reset\n");
 		    goto same_ns;
 		  }
+		ucresolv_info ("send_vc: read len failed, %d %s\n",
+			errno, strerror(errno));
 		return close_and_return_error (statp, resplen2);
 	}
 	int rlen = ntohs (rlen16);
@@ -885,6 +892,7 @@ send_vc(res_state statp,
 		Dprint(statp->options & RES_DEBUG,
 		       (stdout, ";; undersized: %d\n", len));
 		*terrno = EMSGSIZE;
+		ucresolv_info ("send_vc: read < HF\n");
 		return close_and_return_error (statp, resplen2);
 	}
 
@@ -896,6 +904,8 @@ send_vc(res_state statp,
 	if (__glibc_unlikely (n <= 0))       {
 		*terrno = errno;
 		Perror(statp, stderr, "read(vc)", errno);
+		ucresolv_info ("send_vc: read data failed %d %s\n",
+			errno, strerror(errno));
 		return close_and_return_error (statp, resplen2);
 	}
 	if (__glibc_unlikely (truncating))       {
@@ -945,6 +955,7 @@ send_vc(res_state statp,
 	 * All is well, or the error is fatal.  Signal that the
 	 * next nameserver ought not be tried.
 	 */
+	ucresolv_info ("send_vc: read %d\n", resplen);
 	return resplen;
 }
 
