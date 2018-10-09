@@ -399,6 +399,7 @@ __libc_res_nsend(res_state statp, const u_char *buf, int buflen,
 		 int *nansp2, int *resplen2, int *ansp2_malloced)
 {
   int gotsomewhere, terrno, try, v_circuit, resplen, ns, n;
+  int retry_wait = 1;
   ucresolv_debug("UCLIBC __libc_res_nsend\n");
 	if (statp->nscount == 0) {
 		__show_errno (ESRCH);
@@ -568,6 +569,9 @@ __libc_res_nsend(res_state statp, const u_char *buf, int buflen,
 		return (resplen);
  next_ns: ;
 	   } /*foreach ns*/
+           if (retry_wait < 31)
+             retry_wait = (2*retry_wait) + 1;
+           sleep(retry_wait);
 	} /*foreach retry*/
 	//__res_iclose(statp, false);
 	res_nclose(statp);
@@ -1109,13 +1113,13 @@ send_dg(res_state statp,
 	int retval;
 	ucresolv_info ("send_dg retrans %d, retry %d\n", 
 		statp->retrans, statp->retry);
- retry_reopen:
+ retry_reopen:   
 	retval = reopen (statp, terrno, ns);
 	if (retval <= 0)
 	  {
 	    if (resplen2 != NULL)
 	      *resplen2 = 0;
-			ucresolv_debug ("UCLIBC send_dg rtn 1 retry_reopen\n");
+            ucresolv_info ("UCLIBC send_dg rtn 1 retry_reopen\n");
 	    return retval;
 	  }
  retry:
@@ -1150,6 +1154,7 @@ send_dg(res_state statp,
 	if (nwritten == 0)
 	  n = poll (pfd, 1, 0);
 	if (__glibc_unlikely (n == 0))       {
+		ucresolv_info ("UCLIBC send_dg rtn poll with timeout\n");
 		n = poll (pfd, 1, ptimeout);
 		need_recompute = 1;
 	}
@@ -1399,7 +1404,7 @@ send_dg(res_state statp,
 		next_ns:
 			if (recvresp1 || (buf2 != NULL && recvresp2)) {
 			  *resplen2 = 0;
-				ucresolv_debug ("send_dg rtn 9 next_ns\n");
+			  ucresolv_info ("UCLIBC send_dg rtn 9 next_ns\n");
 			  return resplen;
 			}
 			if (buf2 != NULL)

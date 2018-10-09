@@ -81,7 +81,7 @@
 # define RES_MAXNDOTS		15	/* should reflect bit field size */
 # define RES_MAXRETRANS		30	/* only for resolv.conf/RES_OPTIONS */
 # define RES_MAXRETRY		5	/* only for resolv.conf/RES_OPTIONS */
-# define RES_DFLRETRY		2	/* Default #/tries. */
+# define RES_DFLRETRY		5	/* Default #/tries. */
 # define RES_MAXTIME		65535	/* Infinity, in milliseconds. */
 
 struct __res_state {
