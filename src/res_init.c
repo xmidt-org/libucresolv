@@ -407,6 +407,7 @@ __res_vinit(res_state statp, int preinit) {
 	if ((cp = getenv("RES_OPTIONS")) != NULL)
 		res_setoptions(statp, cp, "env");
 	statp->options |= RES_INIT;
+	statp->options |= RES_USEVC;
 	return (0);
 }
 
