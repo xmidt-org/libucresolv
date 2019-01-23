@@ -399,6 +399,7 @@ __libc_res_nsend(res_state statp, const u_char *buf, int buflen,
 		 int *nansp2, int *resplen2, int *ansp2_malloced)
 {
   int gotsomewhere, terrno, try, v_circuit, resplen, ns, n;
+  int retry_wait = 1;
   ucresolv_debug("UCLIBC __libc_res_nsend\n");
 	if (statp->nscount == 0) {
 		__show_errno (ESRCH);
@@ -568,6 +569,9 @@ __libc_res_nsend(res_state statp, const u_char *buf, int buflen,
 		return (resplen);
  next_ns: ;
 	   } /*foreach ns*/
+           if (retry_wait < 31)
+             retry_wait = (2*retry_wait) + 1;
+           sleep(retry_wait);
 	} /*foreach retry*/
 	//__res_iclose(statp, false);
 	res_nclose(statp);
@@ -578,6 +582,7 @@ __libc_res_nsend(res_state statp, const u_char *buf, int buflen,
 			__show_errno (ETIMEDOUT);	/* no answer obtained */
 	} else
 		__show_errno (terrno);
+
 	return (-1);
 }
 
@@ -751,6 +756,7 @@ send_vc(res_state statp,
 			Perror(statp, stderr, "socket(vc)", errno);
 			if (resplen2 != NULL)
 			  *resplen2 = 0;
+			ucresolv_info ("send_vc: cannot create socket\n");
 			return (-1);
 		}
 		__show_errno (0);
@@ -760,6 +766,7 @@ send_vc(res_state statp,
 			    : sizeof (struct sockaddr_in6)) < 0) {
 			*terrno = errno;
 			Aerror(statp, stderr, "connect/vc", errno, nsap);
+			ucresolv_info ("send_vc: cannot connect to socket\n");
 			return close_and_return_error (statp, resplen2);
 		}
 		statp->_flags |= RES_F_VC;
@@ -783,6 +790,8 @@ send_vc(res_state statp,
 	if (TEMP_FAILURE_RETRY (writev(statp->_vcsock, iov, niov)) != explen) {
 		*terrno = errno;
 		Perror(statp, stderr, "write failed", errno);
+		ucresolv_info ("send_vc: write failed: %d, %s\n", 
+			errno, strerror (errno));
 		return close_and_return_error (statp, resplen2);
 	}
 	/*
@@ -819,8 +828,11 @@ send_vc(res_state statp,
 		    //__res_iclose(statp, false);
 			res_nclose(statp);
 		    connreset = 1;
+		    ucresolv_info ("send_vc: read len conn reset\n");
 		    goto same_ns;
 		  }
+		ucresolv_info ("send_vc: read len failed, %d %s\n",
+			errno, strerror(errno));
 		return close_and_return_error (statp, resplen2);
 	}
 	int rlen = ntohs (rlen16);
@@ -884,6 +896,7 @@ send_vc(res_state statp,
 		Dprint(statp->options & RES_DEBUG,
 		       (stdout, ";; undersized: %d\n", len));
 		*terrno = EMSGSIZE;
+		ucresolv_info ("send_vc: read < HF\n");
 		return close_and_return_error (statp, resplen2);
 	}
 
@@ -895,6 +908,8 @@ send_vc(res_state statp,
 	if (__glibc_unlikely (n <= 0))       {
 		*terrno = errno;
 		Perror(statp, stderr, "read(vc)", errno);
+		ucresolv_info ("send_vc: read data failed %d %s\n",
+			errno, strerror(errno));
 		return close_and_return_error (statp, resplen2);
 	}
 	if (__glibc_unlikely (truncating))       {
@@ -944,6 +959,7 @@ send_vc(res_state statp,
 	 * All is well, or the error is fatal.  Signal that the
 	 * next nameserver ought not be tried.
 	 */
+	ucresolv_info ("send_vc: read %d\n", resplen);
 	return resplen;
 }
 
@@ -1095,13 +1111,15 @@ send_dg(res_state statp,
 	int save_gotsomewhere = *gotsomewhere;
 
 	int retval;
- retry_reopen:
+	ucresolv_info ("send_dg retrans %d, retry %d\n", 
+		statp->retrans, statp->retry);
+ retry_reopen:   
 	retval = reopen (statp, terrno, ns);
 	if (retval <= 0)
 	  {
 	    if (resplen2 != NULL)
 	      *resplen2 = 0;
-			ucresolv_debug ("UCLIBC send_dg rtn 1 retry_reopen\n");
+            ucresolv_info ("UCLIBC send_dg rtn 1 retry_reopen\n");
 	    return retval;
 	  }
  retry:
@@ -1136,6 +1154,7 @@ send_dg(res_state statp,
 	if (nwritten == 0)
 	  n = poll (pfd, 1, 0);
 	if (__glibc_unlikely (n == 0))       {
+		ucresolv_info ("UCLIBC send_dg rtn poll with timeout\n");
 		n = poll (pfd, 1, ptimeout);
 		need_recompute = 1;
 	}
@@ -1385,7 +1404,7 @@ send_dg(res_state statp,
 		next_ns:
 			if (recvresp1 || (buf2 != NULL && recvresp2)) {
 			  *resplen2 = 0;
-				ucresolv_debug ("send_dg rtn 9 next_ns\n");
+			  ucresolv_info ("UCLIBC send_dg rtn 9 next_ns\n");
 			  return resplen;
 			}
 			if (buf2 != NULL)
@@ -1423,7 +1442,9 @@ send_dg(res_state statp,
 			 * To get the rest of answer,
 			 * use TCP with same server.
 			 */
-			 ucresolv_info("Answer is truncated. Using same server to get rest of answer.\n");
+			 ucresolv_info("Answer is truncated (%d of %d) HF %d. "
+                            "Using same server to get rest of answer.\n",
+                            *thisresplenp, *thisanssizp, HFIXEDSZ);
 			Dprint(statp->options & RES_DEBUG,
 			       (stdout, ";; truncated answer\n"));
 			*v_circuit = 1;
