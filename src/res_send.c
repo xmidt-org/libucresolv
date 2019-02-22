@@ -753,7 +753,7 @@ send_vc(res_state statp,
 			  *resplen2 = 0;
 			return (-1);
 		}
-		ucresolv_info ("VC-CON");
+		ucresolv_info ("VC-CON\n");
 		if (connect(statp->_vcsock, nsap,
 			    nsap->sa_family == AF_INET
 			    ? sizeof (struct sockaddr_in)
@@ -780,7 +780,7 @@ send_vc(res_state statp,
 		niov = 4;
 		explen += INT16SZ + buflen2;
 	}
-	ucresolv_info ("VC-WRITE");
+	ucresolv_info ("VC-WRITE\n");
 	if (TEMP_FAILURE_RETRY (writev(statp->_vcsock, iov, niov)) != explen) {
 		*terrno = errno;
 		Perror(statp, stderr, "write failed", errno);
@@ -797,7 +797,7 @@ send_vc(res_state statp,
  read_len:
 	cp = (u_char *)&rlen16;
 	len = sizeof(rlen16);
-	ucresolv_info ("VC-READLEN");
+	ucresolv_info ("VC-READLEN\n");
 	while ((n = TEMP_FAILURE_RETRY (read(statp->_vcsock, cp,
 					     (int)len))) > 0) {
 		cp += n;
@@ -821,7 +821,7 @@ send_vc(res_state statp,
 		    //__res_iclose(statp, false);
 			res_nclose(statp);
 		    connreset = 1;
-		    ucresolv_info ("VC-RESET");
+		    ucresolv_info ("VC-RESET\n");
 		    goto same_ns;
 		  }
 		return close_and_return_error (statp, resplen2);
@@ -891,7 +891,7 @@ send_vc(res_state statp,
 	}
 
 	cp = *thisansp;
-	ucresolv_info ("VC-READ");
+	ucresolv_info ("VC-READ\n");
 	while (len != 0 && (n = read(statp->_vcsock, (char *)cp, (int)len)) > 0){
 		cp += n;
 		len -= n;
@@ -907,7 +907,7 @@ send_vc(res_state statp,
 		 */
 		anhp->tc = 1;
 		len = rlen - *thisanssizp;
-		ucresolv_info ("VC-FLUSH");
+		ucresolv_info ("VC-FLUSH\n");
 		while (len != 0) {
 			char junk[PACKETSZ];
 
@@ -933,7 +933,7 @@ send_vc(res_state statp,
 			(stdout, ";; old answer (unexpected):\n"),
 			*thisansp,
 			(rlen > *thisanssizp) ? *thisanssizp: rlen);
-		ucresolv_info ("VC-DROP");
+		ucresolv_info ("VC-DROP\n");
 		goto read_len;
 	}
 
@@ -944,7 +944,7 @@ send_vc(res_state statp,
 	  recvresp2 = 1;
 	/* Repeat waiting if we have a second answer to arrive.  */
 	if ((recvresp1 & recvresp2) == 0) {
-		ucresolv_info ("VC-2ND");
+		ucresolv_info ("VC-2ND\n");
 		goto read_len;
 	}
 
