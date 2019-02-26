@@ -620,6 +620,38 @@ close_and_return_error (res_state statp, int *resplen2)
   return 0;
 }
 
+static ssize_t read_with_timeout (int fd, void *buf, size_t count, int *err)
+{
+  struct timeval timeout;
+  int rtn;
+  ssize_t bytes_read;
+  fd_set fds;
+
+  timeout.tv_sec = 20;
+  timeout.tv_usec = 0;
+
+  FD_ZERO (&fds);
+  FD_SET (fd, &fds);
+
+  *err = 0;
+  rtn = select (fd+1, &fds, NULL, NULL, &timeout);
+  if (rtn < 0) {
+    ucresolv_error ("Error on select (%d) for send_vc\n", errno);
+    *err = errno;
+    return -1;
+  }
+  if (rtn == 0) {
+    *err = ETIMEDOUT;
+    return -2;
+  }
+  bytes_read = read (fd, buf, count);
+  if (bytes_read < 0) {
+    *err = errno;
+    return -1;
+  }
+  return bytes_read;
+}
+
 /* The send_vc function is responsible for sending a DNS query over TCP
    to the nameserver numbered NS from the res_state STATP i.e.
    EXT(statp).nssocks[ns].  The function supports sending both IPv4 and
@@ -798,15 +830,14 @@ send_vc(res_state statp,
 	cp = (u_char *)&rlen16;
 	len = sizeof(rlen16);
 	ucresolv_info ("VC-READLEN\n");
-	while ((n = TEMP_FAILURE_RETRY (read(statp->_vcsock, cp,
-					     (int)len))) > 0) {
+	while ((n = read_with_timeout(statp->_vcsock, cp,
+			(size_t)len, terrno)) > 0) {
 		cp += n;
 		if ((len -= n) <= 0)
 			break;
 	}
 	if (n <= 0) {
-		*terrno = errno;
-		Perror(statp, stderr, "read failed", errno);
+		Perror(statp, stderr, "read failed", *terrno);
 		/*
 		 * A long running process might get its TCP
 		 * connection reset if the remote server was
@@ -892,13 +923,14 @@ send_vc(res_state statp,
 
 	cp = *thisansp;
 	ucresolv_info ("VC-READ\n");
-	while (len != 0 && (n = read(statp->_vcsock, (char *)cp, (int)len)) > 0){
+	while (len != 0 && 
+            (n = read_with_timeout(statp->_vcsock, (char *)cp, (size_t)len, terrno)) > 0)
+        {
 		cp += n;
 		len -= n;
 	}
 	if (__glibc_unlikely (n <= 0))       {
-		*terrno = errno;
-		Perror(statp, stderr, "read(vc)", errno);
+		Perror(statp, stderr, "read(vc)", *terrno);
 		return close_and_return_error (statp, resplen2);
 	}
 	if (__glibc_unlikely (truncating))       {
@@ -910,9 +942,9 @@ send_vc(res_state statp,
 		ucresolv_info ("VC-FLUSH\n");
 		while (len != 0) {
 			char junk[PACKETSZ];
-
-			n = read(statp->_vcsock, junk,
-				 (len > sizeof junk) ? sizeof junk : len);
+			if (len > PACKETSZ)
+			  len = PACKETSZ;
+			n = read_with_timeout(statp->_vcsock, junk, (size_t) len, terrno);
 			if (n > 0)
 				len -= n;
 			else
