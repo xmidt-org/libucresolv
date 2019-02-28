@@ -620,6 +620,40 @@ close_and_return_error (res_state statp, int *resplen2)
   return 0;
 }
 
+static ssize_t read_with_timeout (int fd, void *buf, size_t count, int *err)
+{
+  struct timeval timeout;
+  int rtn;
+  ssize_t bytes_read;
+  fd_set fds;
+
+  timeout.tv_sec = 20;
+  timeout.tv_usec = 0;
+
+  FD_ZERO (&fds);
+  FD_SET (fd, &fds);
+
+  *err = 0;
+  rtn = select (fd+1, &fds, NULL, NULL, &timeout);
+  if (rtn < 0) {
+    ucresolv_error ("Error on select (%d) for send_vc\n", errno);
+    *err = errno;
+    return -1;
+  }
+  if (rtn == 0) {
+    ucresolv_error ("Timed out waiting for read in send_vc\n");
+    *err = ETIMEDOUT;
+    return -2;
+  }
+  bytes_read = read (fd, buf, count);
+  if (bytes_read < 0) {
+    ucresolv_error ("Error on read (%d) in send_vc\n", errno);
+    *err = errno;
+    return -1;
+  }
+  return bytes_read;
+}
+
 /* The send_vc function is responsible for sending a DNS query over TCP
    to the nameserver numbered NS from the res_state STATP i.e.
    EXT(statp).nssocks[ns].  The function supports sending both IPv4 and
@@ -753,7 +787,7 @@ send_vc(res_state statp,
 			  *resplen2 = 0;
 			return (-1);
 		}
-		__show_errno (0);
+		ucresolv_debug ("VC-CON\n");
 		if (connect(statp->_vcsock, nsap,
 			    nsap->sa_family == AF_INET
 			    ? sizeof (struct sockaddr_in)
@@ -780,6 +814,7 @@ send_vc(res_state statp,
 		niov = 4;
 		explen += INT16SZ + buflen2;
 	}
+	ucresolv_debug ("VC-WRITE\n");
 	if (TEMP_FAILURE_RETRY (writev(statp->_vcsock, iov, niov)) != explen) {
 		*terrno = errno;
 		Perror(statp, stderr, "write failed", errno);
@@ -796,15 +831,15 @@ send_vc(res_state statp,
  read_len:
 	cp = (u_char *)&rlen16;
 	len = sizeof(rlen16);
-	while ((n = TEMP_FAILURE_RETRY (read(statp->_vcsock, cp,
-					     (int)len))) > 0) {
+	ucresolv_debug ("VC-READLEN\n");
+	while ((n = read_with_timeout(statp->_vcsock, cp,
+			(size_t)len, terrno)) > 0) {
 		cp += n;
 		if ((len -= n) <= 0)
 			break;
 	}
 	if (n <= 0) {
-		*terrno = errno;
-		Perror(statp, stderr, "read failed", errno);
+		Perror(statp, stderr, "read failed", *terrno);
 		/*
 		 * A long running process might get its TCP
 		 * connection reset if the remote server was
@@ -819,6 +854,7 @@ send_vc(res_state statp,
 		    //__res_iclose(statp, false);
 			res_nclose(statp);
 		    connreset = 1;
+		    ucresolv_debug ("VC-RESET\n");
 		    goto same_ns;
 		  }
 		return close_and_return_error (statp, resplen2);
@@ -888,13 +924,15 @@ send_vc(res_state statp,
 	}
 
 	cp = *thisansp;
-	while (len != 0 && (n = read(statp->_vcsock, (char *)cp, (int)len)) > 0){
+	ucresolv_debug ("VC-READ\n");
+	while (len != 0 && 
+            (n = read_with_timeout(statp->_vcsock, (char *)cp, (size_t)len, terrno)) > 0)
+        {
 		cp += n;
 		len -= n;
 	}
 	if (__glibc_unlikely (n <= 0))       {
-		*terrno = errno;
-		Perror(statp, stderr, "read(vc)", errno);
+		Perror(statp, stderr, "read(vc)", *terrno);
 		return close_and_return_error (statp, resplen2);
 	}
 	if (__glibc_unlikely (truncating))       {
@@ -903,11 +941,12 @@ send_vc(res_state statp,
 		 */
 		anhp->tc = 1;
 		len = rlen - *thisanssizp;
+		ucresolv_debug ("VC-FLUSH\n");
 		while (len != 0) {
 			char junk[PACKETSZ];
-
-			n = read(statp->_vcsock, junk,
-				 (len > sizeof junk) ? sizeof junk : len);
+			if (len > PACKETSZ)
+			  len = PACKETSZ;
+			n = read_with_timeout(statp->_vcsock, junk, (size_t) len, terrno);
 			if (n > 0)
 				len -= n;
 			else
@@ -928,6 +967,7 @@ send_vc(res_state statp,
 			(stdout, ";; old answer (unexpected):\n"),
 			*thisansp,
 			(rlen > *thisanssizp) ? *thisanssizp: rlen);
+		ucresolv_debug ("VC-DROP\n");
 		goto read_len;
 	}
 
@@ -937,8 +977,10 @@ send_vc(res_state statp,
 	else
 	  recvresp2 = 1;
 	/* Repeat waiting if we have a second answer to arrive.  */
-	if ((recvresp1 & recvresp2) == 0)
+	if ((recvresp1 & recvresp2) == 0) {
+		ucresolv_debug ("VC-2ND\n");
 		goto read_len;
+	}
 
 	/*
 	 * All is well, or the error is fatal.  Signal that the
